@@ -4,7 +4,9 @@ import org.springframework.data.neo4j.core.schema.GeneratedValue
 import org.springframework.data.neo4j.core.schema.Id
 import org.springframework.data.neo4j.core.schema.Node
 import org.springframework.data.neo4j.core.schema.Relationship
-import org.vassar.api.Postnomial
+import org.vassar.api.domain.Postnomial
+import org.vassar.api.domain.Email
+import org.vassar.api.domain.Gender
 import java.time.LocalDate
 
 @Node("Person")

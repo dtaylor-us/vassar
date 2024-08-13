@@ -1,4 +1,4 @@
-package org.vassar.api.adapter.out.persistence
+package org.vassar.api.domain
 
 data class Email(val value: String) {
     init {

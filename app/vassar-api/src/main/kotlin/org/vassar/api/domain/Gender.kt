@@ -1,4 +1,4 @@
-package org.vassar.api.adapter.out.persistence
+package org.vassar.api.domain
 
 enum class Gender {
     MALE,

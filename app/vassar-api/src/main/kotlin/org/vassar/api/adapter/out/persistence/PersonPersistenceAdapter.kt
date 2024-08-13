@@ -2,7 +2,7 @@ package org.vassar.api.adapter.out.persistence
 
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
-import org.vassar.api.Postnomial
+import org.vassar.api.domain.Postnomial
 import org.vassar.api.port.out.PersonPort
 import reactor.core.publisher.Mono
 
@@ -19,9 +19,17 @@ class PersonPersistenceAdapter(private val personRepository: PersonRepository) :
         }
     }
 
-    override fun listAll(page: Int, size: Int): Mono<List<PersonNode>> {
-        val pageable = PageRequest.of(page, size)
-        return personRepository.findAll(pageable).collectList()
+//    override fun listAll(page: Int, size: Int): Mono<List<PersonNode>> {
+//        val pageable = PageRequest.of(page, size)
+//        return personRepository.findAll(pageable).collectList()
+//    }
+
+    override fun getGenealogyTree(): Mono<List<PersonNode>> {
+        TODO("Not yet implemented")
+    }
+
+    override fun deleteAll(): Mono<Void> {
+        return personRepository.deleteAll()
     }
 
     fun savePerson(person: PersonNode): Mono<PersonNode> {

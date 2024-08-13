@@ -2,7 +2,7 @@ package org.vassar.api.adapter.`in`.web
 
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import org.vassar.api.Postnomial
+import org.vassar.api.domain.Postnomial
 import org.vassar.api.adapter.out.persistence.PersonNode
 import org.vassar.api.port.`in`.LoadPersonUseCase
 import org.vassar.api.port.`in`.QueryPeopleUseCase
@@ -18,14 +18,14 @@ class PersonController(private val loadPersonUseCase: LoadPersonUseCase, private
             .map { ResponseEntity.ok(it) }
             .defaultIfEmpty(ResponseEntity.notFound().build())
 
-    @GetMapping("/listAll")
-    fun listAll(
-        @RequestParam(defaultValue = "0") page: Int,
-        @RequestParam(defaultValue = "10") size: Int
-    ): Mono<ResponseEntity<List<PersonNode>>> =
-        Mono.from(queryPeopleUseCase.listAll(page, size))
-            .map { ResponseEntity.ok(it) }
-            .defaultIfEmpty(ResponseEntity.notFound().build())
+//    @GetMapping("/listAll")
+//    fun listAll(
+//        @RequestParam(defaultValue = "0") page: Int,
+//        @RequestParam(defaultValue = "10") size: Int
+//    ): Mono<ResponseEntity<List<PersonNode>>> =
+//        Mono.from(queryPeopleUseCase.listAll(page, size))
+//            .map { ResponseEntity.ok(it) }
+//            .defaultIfEmpty(ResponseEntity.notFound().build())
 
     @PostMapping("/create")
     fun createPerson(@RequestBody person: PersonNode): Mono<ResponseEntity<PersonNode>> =

@@ -1,4 +1,4 @@
-package org.vassar.api
+package org.vassar.api.domain
 
 enum class Postnomial {
     NONE,
