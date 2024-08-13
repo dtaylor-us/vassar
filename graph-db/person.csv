@@ -1,0 +1,14 @@
+ID,firstName,lastName,postnomial,birthdate,deathOfDate,email,gender,occupation,bio
+0,Benjamin,Harrison,IV,1693-09-11,1745-07-12,benjamin.harrison.iv@email.com,MALE,"Lawyer;Burgess and High Sheriff;Member of Virginia House of Burgesses","Benjamin Harrison IV was an American Virginia planter, politician, and member of the Virginia House of Burgesses."
+1,Benjamin,Harrison,V,1726-04-05,1791-04-24,benjamin.harrison.v@email.com,MALE,"Member of the Virginia House of Burgesses;Signer of the Declaration of Independence","Benjamin Harrison V was an American planter and merchant, a revolutionary leader, and a Founding Father of the United States."
+2,Elizabeth,Bassett,NONE,1730-01-01,1792-02-13,elizabeth.bassett@email.com,FEMALE,,"Elizabeth Bassett Harrison was the wife of Benjamin Harrison V and the mother of William Henry Harrison, the ninth President of the United States."
+3,William Henry,Harrison,NONE,1773-02-09,1841-04-04,william.henry.harrison@email.com,MALE,"9th President of the United States","William Henry Harrison was an American military officer and politician who served as the ninth president of the United States."
+4,Dilsia,Unknown,NONE,1800-01-01,1850-01-01,dilsia@email.com,FEMALE,Slave,"Dilsia was a slave who had a son, Oliver, with William Henry Harrison."
+5,Oliver,Harrison,NONE,1816-01-01,1900-01-01,oliver.harrison@email.com,MALE,,"Oliver Harrison was the son of Dilsia and William Henry Harrison."
+6,Margaret,Wills,NONE,1818-01-01,1890-01-01,margaret.wills@email.com,FEMALE,,"Margaret Wills was the spouse of Oliver Harrison and the mother of Mary Ann Harrison."
+7,Mary Ann,Harrison,NONE,1838-01-01,1910-01-01,mary.ann.harrison@email.com,FEMALE,,"Mary Ann Harrison was the daughter of Oliver Harrison and Margaret Wills."
+8,Philip M.,Davis,NONE,Unknown,Unknown,philip.davis@email,MALE,Unkown,Unkown
+9,David,Shaw,NONE,Unknown,Unknown,philip.davis@email,MALE,Unkown,Unkown
+10,Beatrice,Davis,NONE,Unknown,Unknown,philip.davis@email,MALE,Unkown,Unkown
+11,Joseph,Vassar,NONE,Unknown,Unknown,philip.davis@email,MALE,Unkown,Unkown
+12,Shaw,Eloise,NONE,Unknown,Unknown,philip.davis@email,MALE,Unkown,Unkown

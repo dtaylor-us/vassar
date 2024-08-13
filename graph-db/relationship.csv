@@ -1,0 +1,9 @@
+ID,startFirstName,startLastName,startPostnomial,type,endFirstName,endLastName,endPostnomial
+
+1,Benjamin,Harrison,IV,PARENT_OF,Benjamin,Harrison,V
+2,Elizabeth,Bassett,NONE,PARENT_OF,William Henry,Harrison,NONE
+3,Benjamin,Harrison,V,PARENT_OF,William Henry,Harrison,NONE
+4,William Henry,Harrison,NONE,PARENT_OF,Oliver,Harrison,NONE
+5,Dilsia,Unknown,NONE,Oliver,Harrison,NONE,PARENT_OF
+6,Oliver,Harrison,NONE,Mary Ann,Harrison,NONE,PARENT_OF
+7,Margaret,Wills,NONE,Mary Ann,Harrison,NONE,PARENT_OF

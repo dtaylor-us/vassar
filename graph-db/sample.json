@@ -1,0 +1,57 @@
+{
+	"id": "4:fd018ca6-7dcf-4b14-94cf-0bc0fe1a9079:0",
+	"firstName": "Benjamin",
+	"lastName": "Harrison",
+	"email": null,
+	"postnomial": "IV",
+	"birthdate": "1693-09-11",
+	"deathOfDate": "1745-07-12",
+	"occupation": [
+		"Lawyer",
+		"Burgess and High Sheriff",
+		"Member of Virginia House of Burgesses"
+	],
+	"bio": "Benjamin Harrison IV was an American Virginia planter, politician, and member of the Virginia House of Burgesses.",
+	"gender": "MALE",
+	"children": [
+		{
+			"id": "4:fd018ca6-7dcf-4b14-94cf-0bc0fe1a9079:1",
+			"firstName": "Benjamin",
+			"lastName": "Harrison",
+			"email": null,
+			"postnomial": "V",
+			"birthdate": "1726-04-05",
+			"deathOfDate": "1791-04-24",
+			"occupation": [
+				"Member of the Virginia House of Burgesses",
+				"Signer of the Declaration of Independence"
+			],
+			"bio": "Benjamin Harrison V was an American planter and merchant, a revolutionary leader, and a Founding Father of the United States.",
+			"gender": "MALE",
+			"children": [],
+			"parents": [],
+			"spouse": null
+		}
+	],
+	"parents": [
+		{
+			"id": "4:fd018ca6-7dcf-4b14-94cf-0bc0fe1a9079:1",
+			"firstName": "Benjamin",
+			"lastName": "Harrison",
+			"email": null,
+			"postnomial": "V",
+			"birthdate": "1726-04-05",
+			"deathOfDate": "1791-04-24",
+			"occupation": [
+				"Member of the Virginia House of Burgesses",
+				"Signer of the Declaration of Independence"
+			],
+			"bio": "Benjamin Harrison V was an American planter and merchant, a revolutionary leader, and a Founding Father of the United States.",
+			"gender": "MALE",
+			"children": [],
+			"parents": [],
+			"spouse": null
+		}
+	],
+	"spouse": null
+}

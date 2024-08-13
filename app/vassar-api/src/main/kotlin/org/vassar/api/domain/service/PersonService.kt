@@ -2,9 +2,9 @@ package org.vassar.api.domain.service
 
 
 import org.springframework.stereotype.Service
-import org.vassar.api.Postnomial
+import org.vassar.api.domain.Postnomial
 import org.vassar.api.adapter.out.persistence.PersonNode
-import org.vassar.api.port.PersonPort
+import org.vassar.api.port.out.PersonPort
 import org.vassar.api.port.`in`.LoadPersonUseCase
 import org.vassar.api.port.`in`.QueryPeopleUseCase
 import reactor.core.publisher.Mono
@@ -13,11 +13,7 @@ import reactor.core.publisher.Mono
 @Service
 class PersonService(private val personPort: PersonPort) : LoadPersonUseCase, QueryPeopleUseCase {
 
-    override fun findByName(firstName: String, lastName: String, postnomial: Postnomial?): Mono<PersonNode> {
-        return personPort.findByName(firstName, lastName, postnomial)
-    }
-
-    override fun loadPerson(person: PersonNode): Mono<PersonNode> {
-        return personPort.loadPerson(person)
-    }
+    override fun findByName(firstName: String, lastName: String, postnomial: Postnomial?): Mono<PersonNode> = personPort.findByName(firstName, lastName, postnomial)
+    override fun getGenealogyTree(): Mono<List<PersonNode>> = personPort.getGenealogyTree()
+    override fun loadPerson(person: PersonNode): Mono<PersonNode> = personPort.loadPerson(person)
 }

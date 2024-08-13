@@ -11,7 +11,6 @@ data class SisterNode(
     @Relationship(type = "PERSON", direction = Relationship.Direction.OUTGOING)
     val person: PersonNode,
     val education: String,
-    val occupation: String,
     @Relationship(type = "HUSBAND_OF", direction = Relationship.Direction.INCOMING)
     val husband: PersonNode?,
     @Relationship(type = "MOTHER_OF", direction = Relationship.Direction.OUTGOING)
