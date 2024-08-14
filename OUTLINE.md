@@ -1,53 +1,69 @@
-## **Introduction to Graph Databases**
+# Fundamentals of working with Graph Databases
 
-### **Small Intro**
-- **Introduction to Graph Databases:**
-  - **What is a Graph Database?**
-    - A graph database is a type of NoSQL database that models data in a graph format, using nodes, edges (relationships), and properties. Unlike traditional relational databases that use tables, graph databases are designed to highlight the relationships between data points, making them ideal for complex queries and analyses where connections between entities are important.
-  - **Why Use Graph Databases?**
-    - They excel at handling highly interconnected data, allowing for rapid traversals and queries that would be inefficient in relational databases. This makes them particularly useful in domains like social networks, recommendation engines, and fraud detection.
+## Introduction
+**What is a Graph Database?**
+A graph database is a type of NoSQL database that models data in a graph format, using nodes, edges (relationships), and properties. Unlike traditional relational databases that use tables, graph databases are designed to highlight the relationships between data points, making them ideal for complex queries and analyses where connections between entities are important.
 
-### **Information / Discussion of Interesting Details**
+**Why Use Graph Databases?**
+They excel at handling highly interconnected data, allowing for rapid traversals and queries that would be inefficient in relational databases. This makes them particularly useful in domains like social networks, recommendation engines, and fraud detection.
 
-#### **1. History of Graph Theory**
-   - **Leonhard Euler and the Königsberg Bridges:**
-     - The foundation of graph theory was laid in 1736 when Euler addressed the problem of finding a walk through the city of Königsberg that would cross each of its seven bridges exactly once. He proved it was impossible, thus pioneering the concept of graph theory.
-   - **Evolution of Graph Theory in Computer Science:**
-     - Graph theory has become a cornerstone of computer science, influencing the development of algorithms for network routing, data structure design, and search engines. Modern graph databases build on these principles to model complex relationships efficiently.
+#### History of Graph Theory
+**Leonhard Euler and the Königsberg Bridges:**
+The foundation of graph theory was laid in 1736 when Euler addressed the problem of finding a walk through the city of Königsberg that would cross each of its seven bridges exactly once. He proved it was impossible, thus pioneering the concept of graph theory.
 
-#### **2. Use Cases for Graph Theory**
-   - **Social Networks:**
-     - Graph databases are ideal for modeling social networks, where the connections (friendships, follows, likes) between people are as important as the people themselves. This enables the analysis of network effects, influence, and community detection.
-   - **Recommendation Engines:**
-     - Companies like Amazon and Netflix use graph databases to analyze user behavior and recommend products or content based on patterns of similarity and shared interests among users.
-   - **Fraud Detection:**
-     - Financial institutions use graph databases to detect fraudulent activity by analyzing transactions and identifying suspicious patterns that may indicate money laundering or other illegal activities.
-   - **Knowledge Graphs:**
-     - Google’s Knowledge Graph organizes information from the web into a comprehensive, connected understanding of facts and concepts, improving search results and information retrieval.
+**Evolution of Graph Theory in Computer Science:**
+Graph theory has become a cornerstone of computer science, influencing the development of algorithms for network routing, data structure design, and search engines. Modern graph databases build on these principles to model complex relationships efficiently.
 
-#### **3. Graph Elements**
-   - **Nodes (Vertices):**
-     - Represent entities such as people, products, or concepts. In our "Books and Authors" example, nodes would represent `Authors` and `Books`.
-   - **Relationships (Edges):**
-     - Represent the connections between nodes, showing how they are related. For instance, an `Author` node might have a `WROTE` relationship connecting it to a `Book` node.
-   - **Properties:**
-     - Nodes and relationships can have properties—key-value pairs that store additional information. For example, a `Book` node might have properties like `title`, `publication_year`, and `ISBN`.
+#### Use Cases for Graph Theory
+**Social Networks:**
+Graph databases are ideal for modeling social networks, where the connections (friendships, follows, likes) between people are as important as the people themselves. This enables the analysis of network effects, influence, and community detection.
 
-#### **4. Directed Graphs**
-   - **Node Traversal:**
-     - In a directed graph, edges have a direction, indicating a one-way relationship between nodes. Traversal in a graph involves moving from one node to another along these directed edges. For example, in the "Books and Authors" graph, you can traverse from an `Author` to the `Books` they wrote by following the `WROTE` relationship.
-   - **Characteristics:**
-     - Directed graphs are used when the relationship between nodes has a clear direction, such as parent-child relationships, dependencies, or sequences. This is crucial in understanding hierarchies or flow processes, such as tracing the influence of one concept on another.
+**Recommendation Engines:**
+Companies like Amazon and Netflix use graph databases to analyze user behavior and recommend products or content based on patterns of similarity and shared interests among users.
 
-#### **5. Property Graph**
-   - **Labels:**
-     - Labels are used to categorize nodes and relationships in a graph. For instance, a node might be labeled as `Author` or `Book`. Labels help in querying the graph by filtering nodes or relationships of interest.
-   - **Properties:**
-     - Each node or relationship can store properties. For example, an `Author` node could have properties like `name`, `birthdate`, and `nationality`. These properties provide detailed information that can be used in queries to filter results or retrieve specific data.
+**Fraud Detection:**
+Financial institutions use graph databases to detect fraudulent activity by analyzing transactions and identifying suspicious patterns that may indicate money laundering or other illegal activities.
 
-#### **6. Index-Free Adjacency**
-   - **Advantage over RDBMS:**
-     - In a relational database, retrieving connected data often requires expensive join operations between tables, which can become slow as data grows. In a graph database, each node directly references its adjacent nodes through relationships, allowing for fast and efficient traversals without needing to perform joins. This is known as index-free adjacency and is one of the key advantages of graph databases, especially for queries that require traversing multiple levels of connections.
+**Knowledge Graphs:**
+Google’s Knowledge Graph organizes information from the web into a comprehensive, connected understanding of facts and concepts, improving search results and information retrieval.
+
+#### **Graph Elements**
+ **Nodes (Vertices):**
+Represent entities such as people, products, or concepts. In our "Books and Authors" example, nodes would represent `Authors` and `Books`.
+
+**Relationships (Edges):**
+Represent the connections between nodes, showing how they are related. For instance, an `Author` node might have a `WROTE` relationship connecting it to a `Book` node.
+
+**Labels:**
+Labels are used to categorize nodes and relationships in a graph. For instance, a node might be labeled as `Author` or `Book`. Labels help in querying the graph by filtering nodes or relationships of interest.
+
+**Properties:**
+Each node or relationship can store properties. For example, an `Author` node could have properties like `name`, `birthdate`, and `nationality`. These properties provide detailed information that can be used in queries to filter results or retrieve specific data.
+
+#### **Directed and Undirected Graphs**
+**Node Traversal:**
+In a directed graph, edges have a direction, indicating a one-way relationship between nodes. Traversal in a graph involves moving from one node to another along these directed edges. For example, in the "Books and Authors" graph, you can traverse from an `Author` to the `Books` they wrote by following the `WROTE` relationship.
+
+In contrast, an undirected graph does not have a direction associated with its edges. Traversal in an undirected graph allows movement between nodes in both directions. For example, in the "Books and Authors" graph, you can traverse from an `Author` to the `Books` they wrote and vice versa, as the relationship is not one-way.
+
+**Characteristics:**
+Directed graphs are used when the relationship between nodes has a clear direction, such as parent-child relationships, dependencies, or sequences. This is crucial in understanding hierarchies or flow processes.
+
+Undirected graphs, on the other hand, are used when the relationship between nodes is bidirectional or does not have a specific direction. This is useful for modeling relationships where the direction is not important, such as friendships or collaborations between authors.
+
+#### **Weighted and Unweighted Graphs**
+**Edge Weights:**
+In a weighted graph, edges have a numerical value associated with them, known as the weight. This weight represents the strength, distance, or cost of the relationship between nodes. For example, in the "Books and Authors" graph, you can assign a weight to the `WROTE` relationship to indicate the significance or popularity of a book.
+
+In contrast, an unweighted graph does not assign any numerical value to its edges. The relationships between nodes are considered to have equal importance or cost. For example, in the "Books and Authors" graph, you can represent the `WROTE` relationship as unweighted if the importance or popularity of books is not a factor in your analysis.
+
+**Characteristics:**
+Weighted graphs are used when the strength or importance of the relationship between nodes needs to be considered. This is useful for various applications, such as finding the shortest path between nodes based on the least weighted edges or determining the most influential nodes in a network.
+
+Unweighted graphs, on the other hand, are used when the relationships between nodes are considered to have equal importance or when the focus is on the structure of the graph rather than the specific weights of the edges.
+
+#### **Performance Advantage over RDBMS**
+ In a relational database, retrieving connected data often requires expensive join operations between tables, which can become slow as data grows. In a graph database, each node directly references its adjacent nodes through relationships, allowing for fast and efficient traversals without needing to perform joins. This is known as index-free adjacency and is one of the key advantages of graph databases, especially for queries that require traversing multiple levels of connections.
 
 #### **7. Introduction to Cypher**
    - **Cypher Query Language:**
