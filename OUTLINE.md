@@ -65,17 +65,18 @@ Unweighted graphs, on the other hand, are used when the relationships between no
 #### **Performance Advantage over RDBMS**
  In a relational database, retrieving connected data often requires expensive join operations between tables, which can become slow as data grows. In a graph database, each node directly references its adjacent nodes through relationships, allowing for fast and efficient traversals without needing to perform joins. This is known as index-free adjacency and is one of the key advantages of graph databases, especially for queries that require traversing multiple levels of connections.
 
-#### **7. Introduction to Cypher**
-   - **Cypher Query Language:**
-     - Cypher is a powerful, expressive query language designed specifically for querying and manipulating graph databases. It allows you to describe patterns in your data graphically, making it intuitive to write queries.
-   - **Basic Syntax Overview:**
-     - Cypher uses a simple, ASCII-art-like syntax to describe patterns. For example, to find all books written by "J.K. Rowling," you might write a query that looks like this:
-       ```cypher
-       MATCH (a:Author {name: "J.K. Rowling"})-[:WROTE]->(b:Book)
-       RETURN b.title, b.publication_year, b.genre
-       ```
+#### Introduction to Cypher
+**Cypher Query Language:**
+Cypher is a powerful, expressive query language designed specifically for querying and manipulating graph databases. It allows you to describe patterns in your data graphically, making it intuitive to write queries.
 
-#### **1. Finding Specific Authors**
+**Basic Syntax Overview:**
+Cypher uses a simple, ASCII-art-like syntax to describe patterns. For example, to find all books written by "J.K. Rowling," you might write a query that looks like this:
+```cypher
+MATCH (a:Author {name: "J.K. Rowling"})-[:WROTE]->(b:Book)
+RETURN b.title, b.publication_year, b.genre
+```
+
+#### Example: Finding Specific Authors
    - **Query Example:**
      ```cypher
      MATCH (a:Author {name: "J.K. Rowling"})-[:WROTE]->(b:Book)
