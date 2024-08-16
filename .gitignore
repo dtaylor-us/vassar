@@ -13,3 +13,4 @@ wheels/
 .envrc
 .idea
 .sesskey
+*/.env
