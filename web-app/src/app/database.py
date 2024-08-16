@@ -5,7 +5,6 @@ from contextlib import asynccontextmanager
 
 load_dotenv()
 
-# Load and print credentials for debugging
 neo4j_uri = os.getenv("NEO4J_URI")
 neo4j_user = os.getenv("NEO4J_USER")
 neo4j_password = os.getenv("NEO4J_PASSWORD")
