@@ -3,17 +3,6 @@ from dotenv import load_dotenv
 from neo4j import GraphDatabase
 from contextlib import asynccontextmanager
 
-load_dotenv()
-
-# Load and print credentials for debugging
-neo4j_uri = os.getenv("NEO4J_URI")
-neo4j_user = os.getenv("NEO4J_USER")
-neo4j_password = os.getenv("NEO4J_PASSWORD")
-neo4j_database = os.getenv("NEO4J_DATABASE", "neo4j")  # Default to 'neo4j' if not specified
-
-print(f"Using Neo4j URI: {neo4j_uri}")
-print(f"Using Neo4j User: {neo4j_user}")
-print(f"Using Neo4j Database: {neo4j_database}")
 
 class Neo4jConnection:
     def __init__(self, uri, user, password, database):
@@ -47,12 +36,24 @@ class Neo4jConnection:
             result = session.run(query, parameters)
             return [record for record in result]
 
-neo4j_conn = Neo4jConnection(
-    neo4j_uri,
-    neo4j_user,
-    neo4j_password,
-    neo4j_database
-)
 
-# Verify connectivity
-neo4j_conn.verify_connection()
+def get_neo4j_conn():
+    load_dotenv()
+
+    # Load and print credentials for debugging
+    neo4j_uri = os.getenv("NEO4J_URI")
+    neo4j_user = os.getenv("NEO4J_USER")
+    neo4j_password = os.getenv("NEO4J_PASSWORD")
+    neo4j_database = os.getenv(
+        "NEO4J_DATABASE", "neo4j"
+    )  # Default to 'neo4j' if not specified
+
+    print(f"Using Neo4j URI: {neo4j_uri}")
+    print(f"Using Neo4j User: {neo4j_user}")
+    print(f"Using Neo4j Database: {neo4j_database}")
+
+    neo4j_conn = Neo4jConnection(neo4j_uri, neo4j_user, neo4j_password, neo4j_database)
+    # Verify connectivity
+    neo4j_conn.verify_connection()
+
+    return neo4j_conn
