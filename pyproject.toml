@@ -1,15 +1,12 @@
 [project]
-name = "web-app"
+name = "vassar"
 version = "0.1.0"
 description = "Add your description here"
-authors = [
-    { name = "dtaylor-us", email = "derektaylor.us@gmail.com" }
-]
+authors = [{ name = "dtaylor-us", email = "derektaylor.us@gmail.com" }]
 dependencies = [
     "fastapi>=0.112.1",
     "uvicorn[standard]>=0.30.6",
     "neo4j>=5.23.1",
-    "fast-html>=1.0.10",
     "python-fasthtml>=0.4.3",
 ]
 readme = "README.md"
@@ -21,10 +18,18 @@ build-backend = "hatchling.build"
 
 [tool.rye]
 managed = true
-dev-dependencies = []
+dev-dependencies = ["ruff>=0.6.1"]
+
+[tool.rye.scripts]
+webapp_dev = "rye run uvicorn vassar.main:app --reload-dir ."
+webapp = "rye run uvicorn vassar.main:app"
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
 
 [tool.hatch.metadata]
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/web_app"]
+packages = ["src/vassar"]
