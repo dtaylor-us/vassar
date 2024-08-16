@@ -170,26 +170,18 @@ web-app/
 ├── src/
 │   ├── app/
 │   │   ├── __init__.py
-│   │   ├── main.py            # FastAPI application setup
 │   │   ├── database.py        # Neo4j database connection
-│   │   ├── routes/
-│   │   │   ├── __init__.py
-│   │   │   └── api.py         # API routes
-│   │   ├── templates/         # FastHTML templates
-│   │   │   └── index.html     # Main HTML file with D3.js
-│   │   ├── static/            # Static files (CSS, JS)
-│   │   │   ├── css/
-│   │   │   └── js/
-│   │   │       └── graph.js   # D3.js code
-│   │   └── models.py          # Data models (if needed)
+│   │   ├── main.py            # FastAPI application setup
+│   │   └── public/
+│   │       └── js/
+│   │           └── graph.js   # D3.js code
 │   └── tests/
-│       ├── test_api.py        # Unit tests for the API
-│       └── test_integration.py # Integration tests
-│
-├── .env                       # Environment variables
-├── pyproject.toml             # Rye configuration
-├── README.md                  # Project documentation
-└── .gitignore                 # Ignored files/folders
+│       ├── __pycache__/
+│       │   ├── __init__.cpython-312.pyc
+│       │   ├── database.cpython-312.pyc
+│       │   └── main.cpython-312.pyc
+│       └── test_api.py        # Unit tests for the API
+└── .env                       # Environment variables
 ```
 
 ### **Setting Up the Backend with FastAPI**
@@ -227,81 +219,219 @@ Rye is a toolchain for Python that manages packages, virtual environments, and b
 **`database.py`:**
 
 ```python
-from neo4j import GraphDatabase
-from fastapi import FastAPI
-from contextlib import asynccontextmanager
 import os
 from dotenv import load_dotenv
+from neo4j import GraphDatabase
+from contextlib import asynccontextmanager
 
-load_dotenv()
 
 class Neo4jConnection:
-    def __init__(self, uri, user, password):
+    def __init__(self, uri, user, password, database):
         self._driver = GraphDatabase.driver(uri, auth=(user, password))
+        self._database = database
 
     def close(self):
         self._driver.close()
 
     @asynccontextmanager
     async def session(self):
-        session = self._driver.session()
+        session = self._driver.session(database=self._database)
         try:
             yield session
         finally:
             session.close()
 
-neo4j_conn = Neo4jConnection(
-    os.getenv("NEO4J_URI"),
-    os.getenv("NEO4J_USER"),
-    os.getenv("NEO4J_PASSWORD")
-)
+    def verify_connection(self):
+        try:
+            with self._driver.session(database=self._database) as session:
+                result = session.run("RETURN 1")
+                if result.single()[0] == 1:
+                    print("Connection to Neo4j is successful!")
+                else:
+                    print("Connection to Neo4j failed.")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
+    def query(self, query, parameters=None):
+        with self._driver.session(database=self._database) as session:
+            result = session.run(query, parameters)
+            return [record for record in result]
+
+
+def get_neo4j_conn():
+    load_dotenv()
+
+    # Load and print credentials for debugging
+    neo4j_uri = os.getenv("NEO4J_URI")
+    neo4j_user = os.getenv("NEO4J_USER")
+    neo4j_password = os.getenv("NEO4J_PASSWORD")
+    neo4j_database = os.getenv(
+        "NEO4J_DATABASE", "neo4j"
+    )  # Default to 'neo4j' if not specified
+
+    print(f"Using Neo4j URI: {neo4j_uri}")
+    print(f"Using Neo4j User: {neo4j_user}")
+    print(f"Using Neo4j Database: {neo4j_database}")
+
+    neo4j_conn = Neo4jConnection(neo4j_uri, neo4j_user, neo4j_password, neo4j_database)
+    # Verify connectivity
+    neo4j_conn.verify_connection()
+
+    return neo4j_conn
+
 ```
 
 **`main.py`:**
 
 ```python
-from app.database import neo4j_conn
-from fasthtml import FastHTML, HTML, Body, Head, Title, Div, Script, H1, Html, Link
-from app.database import neo4j_conn
+from fasthtml.components import Style, Html, Head, Title, Script, Body, Div
+from fasthtml.fastapp import fast_app, serve
+from starlette.responses import FileResponse
 
-app = FastHTML()
+from vassar.database import get_neo4j_conn
 
-@app.route("/")
-async def get_graph(request):
+app, route = fast_app(
+    debug=True,
+    live=True,
+    hdrs=(
+        Style("""* body {
+                    font-family: Arial, sans-serif;
+                }
+
+                #graph {
+                    margin: 20px;
+                    border: 1px solid #ccc;
+                }
+            """),
+    ),
+)
+
+
+@route("/{fname:path}.{ext:static}")
+async def get(fname: str, ext: str):
+    return FileResponse(f"public/{fname}.{ext}")
+
+
+@route("/")
+async def get(request):
     # Query Neo4j database for authors and books
     query = """
     MATCH (a:Author)-[:WROTE]->(b:Book)
     RETURN a.name AS author, b.title AS book
     """
+    neo4j_conn = get_neo4j_conn()
     data = neo4j_conn.query(query)
-    
+
     # Prepare data for D3.js visualization
     nodes = [{"id": record["author"], "group": 1} for record in data]
     books = [{"id": record["book"], "group": 2} for record in data]
     nodes.extend(books)
-    
-    links = [{"source": record["author"], "target": record["book"], "value": 1} for record in data]
+
+    links = [
+        {"source": record["author"], "target": record["book"], "value": 1}
+        for record in data
+    ]
+    # nodes = []
+    # links = []
 
     # Generate the HTML content using FastHTML
-    html_content = Html(
+    return Html(
         Head(
             Title("Books and Authors Graph"),
-            Link(rel="stylesheet", href="/static/css/style.css"),
-            Script(src="https://d3js.org/d3.v6.min.js"),
-            Script(src="/static/js/graph.js")
         ),
         Body(
             Div(id="graph"),
+            Script(src="https://d3js.org/d3.v6.min.js"),
             Script(type="application/json", id="graph-data")(
                 {"nodes": nodes, "links": links}
-            )
-        )
+            ),
+            # Script(src="/public/js/graph.js"), # Use either this line or the next line
+            GraphJS(),  # This one loads the javascript inlined in the page from this function
+        ),
     )
 
-    return app.render(html_content)
+
+def GraphJS():
+    src = """
+    document.addEventListener("DOMContentLoaded", function() {
+  const data = JSON.parse(document.getElementById("graph-data").textContent);
+
+  const width = 800, height = 600;
+
+  const svg = d3.select("#graph").append("svg")
+                .attr("width", width)
+                .attr("height", height);
+
+  const simulation = d3.forceSimulation(data.nodes)
+                       .force("link", d3.forceLink(data.links).id(d => d.id))
+                       .force("charge", d3.forceManyBody())
+                       .force("center", d3.forceCenter(width / 2, height / 2));
+
+  const link = svg.append("g")
+                  .attr("stroke", "#999")
+                  .attr("stroke-opacity", 0.6)
+                  .selectAll("line")
+                  .data(data.links)
+                  .join("line")
+                  .attr("stroke-width", d => Math.sqrt(d.value));
+
+  const node = svg.append("g")
+                  .attr("stroke", "#fff")
+                  .attr("stroke-width", 1.5)
+                  .selectAll("circle")
+                  .data(data.nodes)
+                  .join("circle")
+                  .attr("r", 5)
+                  .attr("fill", d => d.group === 1 ? "#ff5722" : "#03a9f4")
+                  .call(drag(simulation));
+
+  node.append("title")
+      .text(d => d.id);
+
+  simulation.on("tick", () => {
+      link.attr("x1", d => d.source.x)
+          .attr("y1", d => d.source.y)
+          .attr("x2", d => d.target.x)
+          .attr("y2", d => d.target.y);
+
+      node.attr("cx", d => d.x)
+          .attr("cy", d => d.y);
+  });
+
+  function drag(simulation) {
+      function dragstarted(event, d) {
+          if (!event.active) simulation.alphaTarget(0.3).restart();
+          d.fx = d.x;
+          d.fy = d.y;
+      }
+
+      function dragged(event, d) {
+          d.fx = event.x;
+          d.fy = event.y;
+      }
+
+      function dragended(event, d) {
+          if (!event.active) simulation.alphaTarget(0);
+          d.fx = null;
+          d.fy = null;
+      }
+
+      return d3.drag()
+          .on("start", dragstarted)
+          .on("drag", dragged)
+          .on("end", dragended);
+  }
+});
+    """
+    return Script(
+        src, type="module"
+    )  # Note that src does not need to be repeated here (src=src)
+    # because it is the first argument, and otherwise would set the code to be the src attribute (which should be a URL)
+
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=8000)
+    serve(port=5005, reload=True)
+
 
 ```
 
