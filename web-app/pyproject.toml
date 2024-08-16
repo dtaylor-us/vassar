@@ -1,0 +1,30 @@
+[project]
+name = "web-app"
+version = "0.1.0"
+description = "Add your description here"
+authors = [
+    { name = "dtaylor-us", email = "derektaylor.us@gmail.com" }
+]
+dependencies = [
+    "fastapi>=0.112.1",
+    "uvicorn[standard]>=0.30.6",
+    "neo4j>=5.23.1",
+    "fast-html>=1.0.10",
+    "python-fasthtml>=0.4.3",
+]
+readme = "README.md"
+requires-python = ">= 3.8"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = []
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/web_app"]
