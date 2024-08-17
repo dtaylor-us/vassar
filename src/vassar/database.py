@@ -38,6 +38,16 @@ class Neo4jConnection:
 
 def get_neo4j_conn():
     load_dotenv()
+    # /path/to/project/.envrc
+    # Contents:
+    # export NEO4J_URI=bolt://localhost:7687
+    # export NEO4J_USER=neo4j
+    # export NEO4J_PASSWORD=neo4j
+    # export NEO4J_DATABASE=neo4j
+    #
+    # From inside the project directory, run:
+    # $ direnv allow
+    # $ direnv edit
 
     # Load and print credentials for debugging
     neo4j_uri = os.getenv("NEO4J_URI")
