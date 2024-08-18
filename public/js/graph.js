@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     .style("font-size", "12px");
 
   // Draw the arcs (sunburst segments)
-  svg.append("g")
+  const paths = svg.append("g")
     .attr("fill-opacity", 0.6)
     .selectAll("path")
     .data(root.descendants().filter(d => d.depth))
@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     .on("mouseover", function(event, d) {
       tooltip.style("visibility", "visible")
         .text(d.data.name); // Display the full text in the tooltip
-      d3.select(this).attr("fill", d3.rgb(color(d.data.name)).darker(0.5));
+      d3.select(this).attr("fill-opacity", 1); // Darken the opacity on hover
     })
     .on("mousemove", function(event) {
       tooltip.style("top", (event.pageY - 10) + "px")
@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     })
     .on("mouseout", function(event, d) {
       tooltip.style("visibility", "hidden");
-      d3.select(this).attr("fill", color(d.data.name));
+      d3.select(this).attr("fill-opacity", 0.6); // Reset the opacity after hover
     });
 
   // Add text labels with truncation and proper rotation and alignment
@@ -98,4 +98,3 @@ document.addEventListener("DOMContentLoaded", async () => {
     .append("title")
     .text(d => d.data.name); // Ensure full text appears on hover
 });
-
