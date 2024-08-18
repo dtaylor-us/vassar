@@ -532,98 +532,106 @@ if __name__ == "__main__":
 #### **Adding D3.js Visualization**
 
 **`static/js/graph.js`:**
-
 ```javascript
-document.addEventListener("DOMContentLoaded", function () {
-    fetch("/author/J.K. Rowling/books")
-        .then((response) => response.json())
-        .then((data) => {
-            const nodes = [
-                {id: data.author, group: 1},
-                ...data.books.map((book) => ({id: book.title, group: 2})),
-            ];
+document.addEventListener("DOMContentLoaded", async () => {
+  // Fetch the data from the backend
+  const response = await fetch("/graph-data");
+  const data = await response.json();
 
-            const links = data.books.map((book) => ({
-                source: data.author,
-                target: book.title,
-                value: 1,
-            }));
+  // Utility function to truncate text
+  function truncateText(text, maxLength) {
+    return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
+  }
 
-            const width = 800,
-                height = 600;
+  // Set the dimensions and radius of the sunburst
+  const width = 928;
+  const height = 928;
+  const radius = Math.min(width, height) / 2;
 
-            const svg = d3
-                .select("#graph")
-                .append("svg")
-                .attr("width", width)
-                .attr("height", height);
+  // Create the partition layout
+  const partition = d3.partition()
+    .size([2 * Math.PI, radius]);
 
-            const simulation = d3
-                .forceSimulation(nodes)
-                .force(
-                    "link",
-                    d3.forceLink(links).id((d) => d.id)
-                )
-                .force("charge", d3.forceManyBody())
-                .force("center", d3.forceCenter(width / 2, height / 2));
+  // Convert the data into a hierarchy and apply partition layout
+  const root = partition(d3.hierarchy(data)
+    .sum(d => d.value || 1) // Use value if present, otherwise 1 for equal sizing
+    .sort((a, b) => b.value - a.value)
+  );
 
-            const link = svg
-                .append("g")
-                .attr("stroke", "#999")
-                .attr("stroke-opacity", 0.6)
-                .selectAll("line")
-                .data(links)
-                .join("line")
-                .attr("stroke-width", (d) => Math.sqrt(d.value));
+  // Create a color scale based on the root author's children length
+  const color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, data.children.length + 1));
 
-            const node = svg
-                .append("g")
-                .attr("stroke", "#fff")
-                .attr("stroke-width", 1.5)
-                .selectAll("circle")
-                .data(nodes)
-                .join("circle")
-                .attr("r", 5)
-                .attr("fill", (d) => (d.group === 1 ? "#ff5722" : "#03a9f4"))
-                .call(drag(simulation));
+  // Create the SVG container centered on the screen
+  const svg = d3.select("#graph")
+      .append("svg")
+      .attr("width", width)
+      .attr("height", height)
+      .style("display", "block")
+      .style("margin", "0 auto")
+      .append("g")
+      .attr("transform", `translate(${width / 2},${height / 2})`);
 
-            node.append("title").text((d) => d.id);
+  // Define the arc generator with padding for visual separation
+  const arc = d3.arc()
+    .startAngle(d => d.x0)
+    .endAngle(d => d.x1)
+    .padAngle(d => Math.min((d.x1 - d.x0) / 2, 0.005))
+    .padRadius(radius / 2)
+    .innerRadius(d => d.y0)
+    .outerRadius(d => d.y1 - 1);
 
-            simulation.on("tick", () => {
-                link
-                    .attr("x1", (d) => d.source.x)
-                    .attr("y1", (d) => d.source.y)
-                    .attr("x2", (d) => d.target.x)
-                    .attr("y2", (d) => d.target.y);
+  // Create a tooltip div that is hidden by default
+  const tooltip = d3.select("body").append("div")
+    .style("position", "absolute")
+    .style("visibility", "hidden")
+    .style("background", "#fff")
+    .style("border", "1px solid #ccc")
+    .style("padding", "8px")
+    .style("border-radius", "4px")
+    .style("box-shadow", "0px 0px 10px rgba(0, 0, 0, 0.1)")
+    .style("font-family", "sans-serif")
+    .style("font-size", "12px");
 
-                node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
-            });
+  // Draw the arcs (sunburst segments)
+  const paths = svg.append("g")
+    .attr("fill-opacity", 0.6)
+    .selectAll("path")
+    .data(root.descendants().filter(d => d.depth))
+    .join("path")
+    .attr("fill", d => { while (d.depth > 1) d = d.parent; return color(d.data.name); })
+    .attr("d", arc)
+    .on("mouseover", function(event, d) {
+      tooltip.style("visibility", "visible")
+        .text(d.data.name); // Display the full text in the tooltip
+      d3.select(this).attr("fill-opacity", 1); // Darken the opacity on hover
+    })
+    .on("mousemove", function(event) {
+      tooltip.style("top", (event.pageY - 10) + "px")
+        .style("left", (event.pageX + 10) + "px");
+    })
+    .on("mouseout", function(event, d) {
+      tooltip.style("visibility", "hidden");
+      d3.select(this).attr("fill-opacity", 0.6); // Reset the opacity after hover
+    });
 
-            function drag(simulation) {
-                function dragstarted(event, d) {
-                    if (!event.active) simulation.alphaTarget(0.3).restart();
-                    d.fx = d.x;
-                    d.fy = d.y;
-                }
-
-                function dragged(event, d) {
-                    d.fx = event.x;
-                    d.fy = event.y;
-                }
-
-                function dragended(event, d) {
-                    if (!event.active) simulation.alphaTarget(0);
-                    d.fx = null;
-                    d.fy = null;
-                }
-
-                return d3
-                    .drag()
-                    .on("start", dragstarted)
-                    .on("drag", dragged)
-                    .on("end", dragended);
-            }
-        });
+  // Add text labels with truncation and proper rotation and alignment
+  svg.append("g")
+    .attr("pointer-events", "none")
+    .attr("text-anchor", "middle")
+    .attr("font-size", 10)
+    .attr("font-family", "sans-serif")
+    .selectAll("text")
+    .data(root.descendants().filter(d => d.depth && (d.y0 + d.y1) / 2 * (d.x1 - d.x0) > 10))
+    .join("text")
+    .attr("transform", function(d) {
+      const x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
+      const y = (d.y0 + d.y1) / 2;
+      return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
+    })
+    .attr("dy", "0.35em")
+    .text(d => truncateText(d.data.name, 15)) // Truncate the text if necessary
+    .append("title")
+    .text(d => d.data.name); // Ensure full text appears on hover
 });
 ```
 
