@@ -10,7 +10,6 @@ RETURN p, descendant;
 """
 
 
-
 @rt("/{fname:path}.{ext:static}")
 async def get(fname: str, ext: str):
     return FileResponse(f"public/{fname}.{ext}")
@@ -41,7 +40,7 @@ async def format_graph_data(data):
     if len(roots) == 1:
         return roots[0]
     else:
-        return {"name": "Family Tree", "children": roots}
+        return {"name": "Tree", "children": roots}
 
 
 @rt("/tree")
@@ -53,13 +52,48 @@ async def get(request):
 
 
 @rt('/')
-def get(): return (Title("Family Tree Visualization"),
-                   Head(Link(rel="stylesheet",
-                             href="https://cdnjs.cloudflare.com/ajax/libs/tachyons/4.11.1/tachyons.min.css",
-                             type="text/css")),
-                   Nav(A("Graph DB Fundamentals", href="/", cls="link dim white b f6 f5-ns dib mr3"),
-                       A("Home", href="/", cls="link dim light-gray f6 f5-ns dib mr3"),
-                       cls="pa3 pa4-ns"),
-                   Main(Div(id="family-tree"), cls="container"),
-                   Script(src="https://d3js.org/d3.v6.min.js"),
-                   Script(src="/public/js/tree.js"))
+def get():     return (
+    Title("Family Tree Visualization"),
+    Head(
+        Link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/tachyons/4.11.1/tachyons.min.css",
+             type="text/css"),
+        Link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css")
+    ),
+    Nav(
+        A("Graph DB Fundamentals", href="/", cls="link dim white b f6 f5-ns dib mr3"),
+        A("Home", href="/", cls="link dim light-gray f6 f5-ns dib mr3"),
+        cls="pa3 pa4-ns"
+    ),
+    Main(
+        Div(
+            Span(I(cls="fas fa-question-circle blue mb3"), P("Instructions", cls="ml2"), cls="flex pointer info-icon"),
+            Div(
+                Div(Span("X", cls="close-btn f6 blue pointer"),
+                    cls="flex justify-end items-center"),
+                Ul(
+                    Li("Zoom: Mouse wheel / touchpad scroll"),
+                    Li("Pan: Click and drag."),
+                    cls="pl3"
+                ),
+                cls="info-banner pa3 ba br-rounded b--light-silver br2 shadow-1"
+            ),
+            cls="info-container"
+        ),
+        Button("Expand All", id="expand-all", cls="f6 link dim br-rounded ph3 pv2 mb4 mt4 dib white bg-dark-blue"),
+        Div(id="family-tree"),
+        cls="container"
+    ),
+
+    Script(src="https://d3js.org/d3.v6.min.js"),
+    Script(src="/public/js/tree.js"),
+    Script('''
+            document.querySelector('.info-icon').addEventListener('click', () => {
+                const banner = document.querySelector('.info-banner');
+                banner.style.display = banner.style.display === 'block' ? 'none' : 'block';
+            });
+
+            document.querySelector('.close-btn').addEventListener('click', () => {
+                document.querySelector('.info-banner').style.display = 'none';
+            });
+        ''')
+)
