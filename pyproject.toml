@@ -21,7 +21,8 @@ managed = true
 dev-dependencies = ["ruff>=0.6.1"]
 
 [tool.rye.scripts]
-webapp_dev = "rye run uvicorn vassar.books:app --reload-dir ."
+books_app_dev = "rye run uvicorn vassar.books:app --reload-dir ."
+tree_app_dev = "rye run uvicorn vassar.tree:app --reload-dir ."
 webapp = "rye run uvicorn vassar.books:app"
 
 [tool.pyright]

@@ -94,14 +94,15 @@ allowing for fast and efficient traversals without needing to perform joins. Thi
 is one of the key advantages of graph databases, especially for queries that require traversing multiple levels of
 connections.
 
-
 ### Getting Started with Neo4j
 
 There are several ways to get started with Neo4j:
 
 #### Neo4j Aura
 
-Neo4j Aura is a fully-managed cloud service provided by Neo4j. It's the simplest way to run Neo4j in the cloud, completely automated and fully managed. It's always on and ideal for building cloud-based applications with graph technology.
+Neo4j Aura is a fully-managed cloud service provided by Neo4j. It's the simplest way to run Neo4j in the cloud,
+completely automated and fully managed. It's always on and ideal for building cloud-based applications with graph
+technology.
 
 To get started with Neo4j Aura:
 
@@ -113,7 +114,8 @@ To get started with Neo4j Aura:
 
 #### Neo4j Desktop
 
-Neo4j Desktop is an application environment that allows you to design, develop, and deploy graph applications right from your local machine. It's ideal for local development and testing.
+Neo4j Desktop is an application environment that allows you to design, develop, and deploy graph applications right from
+your local machine. It's ideal for local development and testing.
 
 To get started with Neo4j Desktop:
 
@@ -130,7 +132,8 @@ If you prefer to use Docker for managing your development environments, you can 
 
 To get started with Neo4j on Docker:
 
-1. Ensure you have Docker installed on your machine. If not, you can download it from the [Docker website](https://www.docker.com/products/docker-desktop).
+1. Ensure you have Docker installed on your machine. If not, you can download it from
+   the [Docker website](https://www.docker.com/products/docker-desktop).
 2. Pull the Neo4j image from Docker Hub by running the following command in your terminal:
 
 ```bash
@@ -150,10 +153,11 @@ docker run \
     neo4j
 ```
 
-In this command, replace `$HOME/neo4j/data` and `$HOME/neo4j/logs` with the paths where you want to store your data and logs. Replace `neo4j/test` with the username and password you want to use for your database.
+In this command, replace `$HOME/neo4j/data` and `$HOME/neo4j/logs` with the paths where you want to store your data and
+logs. Replace `neo4j/test` with the username and password you want to use for your database.
 
-4. You can then access the Neo4j Browser at `http://localhost:7474` and connect to your database using the credentials you provided.
-
+4. You can then access the Neo4j Browser at `http://localhost:7474` and connect to your database using the credentials
+   you provided.
 
 #### Introduction to Cypher
 
@@ -279,7 +283,7 @@ directory inside your Neo4j database folder.
 
 ##### **Loading Author and Book Data**
 
-Files for the Author and Book demo can be found in the `data` directory of the project. 
+Files for the Author and Book demo can be found in the `data` directory of the project.
 
 ```cypher
 LOAD CSV WITH HEADERS FROM 'file:///series.csv' AS row
@@ -532,106 +536,110 @@ if __name__ == "__main__":
 #### **Adding D3.js Visualization**
 
 **`static/js/graph.js`:**
+
 ```javascript
 document.addEventListener("DOMContentLoaded", async () => {
-  // Fetch the data from the backend
-  const response = await fetch("/graph-data");
-  const data = await response.json();
+    // Fetch the data from the backend
+    const response = await fetch("/graph-data");
+    const data = await response.json();
 
-  // Utility function to truncate text
-  function truncateText(text, maxLength) {
-    return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
-  }
+    // Utility function to truncate text
+    function truncateText(text, maxLength) {
+        return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
+    }
 
-  // Set the dimensions and radius of the sunburst
-  const width = 928;
-  const height = 928;
-  const radius = Math.min(width, height) / 2;
+    // Set the dimensions and radius of the sunburst
+    const width = 928;
+    const height = 928;
+    const radius = Math.min(width, height) / 2;
 
-  // Create the partition layout
-  const partition = d3.partition()
-    .size([2 * Math.PI, radius]);
+    // Create the partition layout
+    const partition = d3.partition()
+        .size([2 * Math.PI, radius]);
 
-  // Convert the data into a hierarchy and apply partition layout
-  const root = partition(d3.hierarchy(data)
-    .sum(d => d.value || 1) // Use value if present, otherwise 1 for equal sizing
-    .sort((a, b) => b.value - a.value)
-  );
+    // Convert the data into a hierarchy and apply partition layout
+    const root = partition(d3.hierarchy(data)
+        .sum(d => d.value || 1) // Use value if present, otherwise 1 for equal sizing
+        .sort((a, b) => b.value - a.value)
+    );
 
-  // Create a color scale based on the root author's children length
-  const color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, data.children.length + 1));
+    // Create a color scale based on the root author's children length
+    const color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, data.children.length + 1));
 
-  // Create the SVG container centered on the screen
-  const svg = d3.select("#graph")
-      .append("svg")
-      .attr("width", width)
-      .attr("height", height)
-      .style("display", "block")
-      .style("margin", "0 auto")
-      .append("g")
-      .attr("transform", `translate(${width / 2},${height / 2})`);
+    // Create the SVG container centered on the screen
+    const svg = d3.select("#graph")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .style("display", "block")
+        .style("margin", "0 auto")
+        .append("g")
+        .attr("transform", `translate(${width / 2},${height / 2})`);
 
-  // Define the arc generator with padding for visual separation
-  const arc = d3.arc()
-    .startAngle(d => d.x0)
-    .endAngle(d => d.x1)
-    .padAngle(d => Math.min((d.x1 - d.x0) / 2, 0.005))
-    .padRadius(radius / 2)
-    .innerRadius(d => d.y0)
-    .outerRadius(d => d.y1 - 1);
+    // Define the arc generator with padding for visual separation
+    const arc = d3.arc()
+        .startAngle(d => d.x0)
+        .endAngle(d => d.x1)
+        .padAngle(d => Math.min((d.x1 - d.x0) / 2, 0.005))
+        .padRadius(radius / 2)
+        .innerRadius(d => d.y0)
+        .outerRadius(d => d.y1 - 1);
 
-  // Create a tooltip div that is hidden by default
-  const tooltip = d3.select("body").append("div")
-    .style("position", "absolute")
-    .style("visibility", "hidden")
-    .style("background", "#fff")
-    .style("border", "1px solid #ccc")
-    .style("padding", "8px")
-    .style("border-radius", "4px")
-    .style("box-shadow", "0px 0px 10px rgba(0, 0, 0, 0.1)")
-    .style("font-family", "sans-serif")
-    .style("font-size", "12px");
+    // Create a tooltip div that is hidden by default
+    const tooltip = d3.select("body").append("div")
+        .style("position", "absolute")
+        .style("visibility", "hidden")
+        .style("background", "#fff")
+        .style("border", "1px solid #ccc")
+        .style("padding", "8px")
+        .style("border-radius", "4px")
+        .style("box-shadow", "0px 0px 10px rgba(0, 0, 0, 0.1)")
+        .style("font-family", "sans-serif")
+        .style("font-size", "12px");
 
-  // Draw the arcs (sunburst segments)
-  const paths = svg.append("g")
-    .attr("fill-opacity", 0.6)
-    .selectAll("path")
-    .data(root.descendants().filter(d => d.depth))
-    .join("path")
-    .attr("fill", d => { while (d.depth > 1) d = d.parent; return color(d.data.name); })
-    .attr("d", arc)
-    .on("mouseover", function(event, d) {
-      tooltip.style("visibility", "visible")
-        .text(d.data.name); // Display the full text in the tooltip
-      d3.select(this).attr("fill-opacity", 1); // Darken the opacity on hover
-    })
-    .on("mousemove", function(event) {
-      tooltip.style("top", (event.pageY - 10) + "px")
-        .style("left", (event.pageX + 10) + "px");
-    })
-    .on("mouseout", function(event, d) {
-      tooltip.style("visibility", "hidden");
-      d3.select(this).attr("fill-opacity", 0.6); // Reset the opacity after hover
-    });
+    // Draw the arcs (sunburst segments)
+    const paths = svg.append("g")
+        .attr("fill-opacity", 0.6)
+        .selectAll("path")
+        .data(root.descendants().filter(d => d.depth))
+        .join("path")
+        .attr("fill", d => {
+            while (d.depth > 1) d = d.parent;
+            return color(d.data.name);
+        })
+        .attr("d", arc)
+        .on("mouseover", function (event, d) {
+            tooltip.style("visibility", "visible")
+                .text(d.data.name); // Display the full text in the tooltip
+            d3.select(this).attr("fill-opacity", 1); // Darken the opacity on hover
+        })
+        .on("mousemove", function (event) {
+            tooltip.style("top", (event.pageY - 10) + "px")
+                .style("left", (event.pageX + 10) + "px");
+        })
+        .on("mouseout", function (event, d) {
+            tooltip.style("visibility", "hidden");
+            d3.select(this).attr("fill-opacity", 0.6); // Reset the opacity after hover
+        });
 
-  // Add text labels with truncation and proper rotation and alignment
-  svg.append("g")
-    .attr("pointer-events", "none")
-    .attr("text-anchor", "middle")
-    .attr("font-size", 10)
-    .attr("font-family", "sans-serif")
-    .selectAll("text")
-    .data(root.descendants().filter(d => d.depth && (d.y0 + d.y1) / 2 * (d.x1 - d.x0) > 10))
-    .join("text")
-    .attr("transform", function(d) {
-      const x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
-      const y = (d.y0 + d.y1) / 2;
-      return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
-    })
-    .attr("dy", "0.35em")
-    .text(d => truncateText(d.data.name, 15)) // Truncate the text if necessary
-    .append("title")
-    .text(d => d.data.name); // Ensure full text appears on hover
+    // Add text labels with truncation and proper rotation and alignment
+    svg.append("g")
+        .attr("pointer-events", "none")
+        .attr("text-anchor", "middle")
+        .attr("font-size", 10)
+        .attr("font-family", "sans-serif")
+        .selectAll("text")
+        .data(root.descendants().filter(d => d.depth && (d.y0 + d.y1) / 2 * (d.x1 - d.x0) > 10))
+        .join("text")
+        .attr("transform", function (d) {
+            const x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
+            const y = (d.y0 + d.y1) / 2;
+            return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
+        })
+        .attr("dy", "0.35em")
+        .text(d => truncateText(d.data.name, 15)) // Truncate the text if necessary
+        .append("title")
+        .text(d => d.data.name); // Ensure full text appears on hover
 });
 ```
 
@@ -655,317 +663,312 @@ body {
 1. **Start the server using Uvicorn:**
 
    ```bash
-   rye run uvicorn app.main:app --reload
+   rye run uvicorn app.books:app --reload
    ```
 
 2. **Access the application in your browser:**
     - Navigate to `http://localhost:8000/` to view the D3.js visualization of the "Books and Authors" graph.
+    -
 
-### **Conclusion**
+#### **Deploying the Application**
 
-By following this setup, you’ve created a fully functional web application that integrates FastAPI with Neo4j for
-backend processing and D3.js for dynamic, interactive frontend visualizations. The use of Rye simplifies dependency
-management, and FastHTML streamlines the templating process. This structure is designed to be scalable and maintainable,
-making it a great starting point for further development.
+### **Building a Web Application to Visualize a Family Tree with Python Tooling and D3.js**
 
-#### **4. Deploying the Application**
-
-- **Docker for Containerization:**
-
-    - Containerize the FastAPI application using Docker. This ensures that the application is portable and can run
-      consistently across different environments.
-
-  ```dockerfile
-  FROM python:3.9-slim
-
-  WORKDIR /app
-
-  COPY requirements.txt requirements.txt
-  RUN pip install -r requirements.txt
-
-  COPY . .
-
-  CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
-  ```
-
-- **AWS Deployment:**
-    - Deploy the containerized application to AWS using services like AWS Elastic Beanstalk, ECS, or even a simple EC2
-      instance. Discuss the steps for setting up the deployment pipeline and scaling the application as needed.
-
-### **Demo 2: Building a Web Application to Visualize a Family Tree with Python Tooling and D3.js**
-
-In this second demo, we'll walk through creating a web application that visualizes a family tree using a graph database
-schema. This application will allow users to explore the hierarchical relationships within a family, such as
+In this demo, we'll walk through the process of creating a web application that visualizes a family tree using a graph
+database schema. The application will allow users to explore the hierarchical relationships within a family, such as
 parent-child and sibling relationships. The backend will be powered by FastAPI, and the frontend will use D3.js to
 render the family tree.
 
-#### **1. Designing the Family Tree Graph Schema**
+---
 
-- **Nodes (Entities):**
+#### **Designing the Family Tree Graph Schema**
 
-    1. **Person**
-        - `name`: String (e.g., "John Doe")
-        - `birthdate`: Date (e.g., "1980-01-15")
-        - `gender`: String (e.g., "Male" or "Female")
-        - `birthplace`: String (e.g., "New York")
+**Nodes (Entities):**
 
-- **Relationships:**
+**Person**
 
-    1. **PARENT_OF**
+- `name`: String (e.g., "John Doe")
+- `birthdate`: Date (e.g., "1980-01-15")
+- `gender`: String (e.g., "Male" or "Female")
+- `birthplace`: String (e.g., "New York")
 
-        - **From:** `Person`
-        - **To:** `Person`
-        - **Properties:**
-            - `relationship`: String (e.g., "Mother", "Father")
+**Relationships:**
 
-    2. **SIBLING_OF**
-        - **From:** `Person`
-        - **To:** `Person`
-        - **Properties:**
-            - `relationship`: String (e.g., "Brother", "Sister")
+**PARENT_OF**
 
-- **Example Data:**
-    - Nodes:
-        - `Person: {name: "John Doe", birthdate: "1980-01-15", gender: "Male", birthplace: "New York"}`
-        - `Person: {name: "Jane Doe", birthdate: "1978-03-22", gender: "Female", birthplace: "New York"}`
-        - `Person: {name: "Alice Doe", birthdate: "2005-07-18", gender: "Female", birthplace: "New York"}`
-    - Relationships:
-        - `(John Doe)-[:PARENT_OF]->(Alice Doe)`
-        - `(Jane Doe)-[:PARENT_OF]->(Alice Doe)`
-        - `(John Doe)-[:SIBLING_OF]->(Jane Doe)`
+- **From:** Person
+- **To:** Person
+- **Properties:**
+    - `relationship`: String (e.g., "Mother", "Father")
 
-#### **2. Setting Up the Backend with FastAPI**
+**SIBLING_OF**
 
-- **FastAPI Application Setup:**
+- **From:** Person
+- **To:** Person
+- **Properties:**
+    - `relationship`: String (e.g., "Brother", "Sister")
 
-    - As before, we'll use FastAPI to build the backend that interacts with the Neo4j database. Here’s how to establish
-      a connection and create a simple endpoint to retrieve family tree data:
+**Example Data:**
 
-  ```python
-  from fastapi import FastAPI
-  from neo4j import GraphDatabase
+Nodes:
 
-  app = FastAPI()
+- Person: `{name: "John Doe", birthdate: "1980-01-15", gender: "Male", birthplace: "New York"}`
+- Person: `{name: "Jane Doe", birthdate: "1978-03-22", gender: "Female", birthplace: "New York"}`
+- Person: `{name: "Alice Doe", birthdate: "2005-07-18", gender: "Female", birthplace: "New York"}`
 
-  driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", "password"))
+Relationships:
 
-  @app.on_event("shutdown")
-  def shutdown():
-      driver.close()
+- `(John Doe)-[:PARENT_OF]->(Alice Doe)`
+- `(Jane Doe)-[:PARENT_OF]->(Alice Doe)`
+- `(John Doe)-[:SIBLING_OF]->(Jane Doe)`
 
-  def get_db():
-      with driver.session() as session:
-          yield session
-  ```
+---
+
+#### **Setting Up the Backend with FastHTML**
+
+**FastHTML Application Setup:**
+
+We'll use FastHTML, a Python framework that allows for fast and efficient rendering of HTML in the backend while
+interacting with Neo4j.
+
+```python
+from fasthtml.fastapp import fast_app, serve
+from neo4j import GraphDatabase
+
+app, route = fast_app(debug=True, live=True)
+
+driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", "password"))
+
+
+@app.on_event("shutdown")
+def shutdown():
+    driver.close()
+
+
+def get_db():
+    with driver.session() as session:
+        yield session
+```
 
 - **API Endpoint for Family Tree:**
 
-    - Create an endpoint to retrieve the entire family tree starting from a specific person:
+Create an endpoint to retrieve the entire family tree starting from a specific person:
 
-  ```python
-  @app.get("/family-tree/{person_name}")
-  def get_family_tree(person_name: str):
-      query = """
-      MATCH (p:Person {name: $person_name})-[:PARENT_OF*0..]->(descendants)
-      OPTIONAL MATCH (p)-[:SIBLING_OF]->(siblings)
-      RETURN p, descendants, siblings
-      """
-      with driver.session() as session:
-          result = session.run(query, person_name=person_name)
-          nodes = []
-          links = []
-          for record in result:
-              parent = record["p"]
-              nodes.append({"id": parent["name"], "group": 1})
-              if "descendants" in record:
-                  for child in record["descendants"]:
-                      nodes.append({"id": child["name"], "group": 2})
-                      links.append({"source": parent["name"], "target": child["name"], "value": 1})
-              if "siblings" in record:
-                  for sibling in record["siblings"]:
-                      nodes.append({"id": sibling["name"], "group": 3})
-                      links.append({"source": parent["name"], "target": sibling["name"], "value": 1})
-          return {"nodes": nodes, "links": links}
-  ```
+```python
+@route("/family-tree/{person_name}")
+async def get_family_tree(request, person_name: str):
+    query = """
+    MATCH (p:Person {name: $person_name})-[:PARENT_OF*0..]->(descendants)
+    OPTIONAL MATCH (p)-[:SIBLING_OF]->(siblings)
+    RETURN p, descendants, siblings
+    """
+    with driver.session() as session:
+        result = session.run(query, person_name=person_name)
+        nodes = []
+        links = []
+        for record in result:
+            parent = record["p"]
+            nodes.append({"id": parent["name"], "group": 1})
+            if "descendants" in record:
+                for child in record["descendants"]:
+                    nodes.append({"id": child["name"], "group": 2})
+                    links.append({"source": parent["name"], "target": child["name"], "value": 1})
+            if "siblings" in record:
+                for sibling in record["siblings"]:
+                    nodes.append({"id": sibling["name"], "group": 3})
+                    links.append({"source": parent["name"], "target": sibling["name"], "value": 1})
+        return {"nodes": nodes, "links": links}
+```
 
 - **Explanation:**
-    - This endpoint retrieves all descendants and siblings of a specified person. It returns the family members
-      as `nodes` and the relationships between them as `links`.
+    - This endpoint retrieves all descendants and siblings of a specified person. It returns the family members as nodes
+      and the relationships between them as links.
 
-#### **3. Building the Frontend with D3.js**
+---
+
+#### **Building the Frontend with D3.js**
 
 - **Visualizing the Family Tree:**
 
-    - Use D3.js to create a hierarchical tree that represents the family structure. Here’s a basic example:
+Use D3.js to create a hierarchical tree that represents the family structure. Here’s a basic example:
 
-  ```html
-  <div id="family-tree"></div>
-  <script src="https://d3js.org/d3.v6.min.js"></script>
-  <script>
+```html
+
+<div id="family-tree"></div>
+<script src="https://d3js.org/d3.v6.min.js"></script>
+<script>
     fetch("/family-tree/John Doe")
-      .then((response) => response.json())
-      .then((data) => {
-        const width = 800,
-          height = 600;
+            .then((response) => response.json())
+            .then((data) => {
+                const width = 800,
+                        height = 600;
 
-        const svg = d3
-          .select("#family-tree")
-          .append("svg")
-          .attr("width", width)
-          .attr("height", height);
+                const svg = d3
+                        .select("#family-tree")
+                        .append("svg")
+                        .attr("width", width)
+                        .attr("height", height);
 
-        const simulation = d3
-          .forceSimulation(data.nodes)
-          .force(
-            "link",
-            d3.forceLink(data.links).id((d) => d.id)
-          )
-          .force("charge", d3.forceManyBody())
-          .force("center", d3.forceCenter(width / 2, height / 2));
+                const simulation = d3
+                        .forceSimulation(data.nodes)
+                        .force(
+                                "link",
+                                d3.forceLink(data.links).id((d) => d.id)
+                        )
+                        .force("charge", d3.forceManyBody())
+                        .force("center", d3.forceCenter(width / 2, height / 2));
 
-        const link = svg
-          .append("g")
-          .attr("stroke", "#999")
-          .attr("stroke-opacity", 0.6)
-          .selectAll("line")
-          .data(data.links)
-          .join("line")
-          .attr("stroke-width", (d) => Math.sqrt(d.value));
+                const link = svg
+                        .append("g")
+                        .attr("stroke", "#999")
+                        .attr("stroke-opacity", 0.6)
+                        .selectAll("line")
+                        .data(data.links)
+                        .join("line")
+                        .attr("stroke-width", (d) => Math.sqrt(d.value));
 
-        const node = svg
-          .append("g")
-          .attr("stroke", "#fff")
-          .attr("stroke-width", 1.5)
-          .selectAll("circle")
-          .data(data.nodes)
-          .join("circle")
-          .attr("r", 5)
-          .attr("fill", (d) =>
-            d.group === 1 ? "#ff5722" : d.group === 2 ? "#03a9f4" : "#4caf50"
-          )
-          .call(drag(simulation));
+                const node = svg
+                        .append("g")
+                        .attr("stroke", "#fff")
+                        .attr("stroke-width", 1.5)
+                        .selectAll("circle")
+                        .data(data.nodes)
+                        .join("circle")
+                        .attr("r", 5)
+                        .attr("fill", (d) =>
+                                d.group === 1 ? "#ff5722" : d.group === 2 ? "#03a9f4" : "#4caf50"
+                        )
+                        .call(drag(simulation));
 
-        node.append("title").text((d) => d.id);
+                node.append("title").text((d) => d.id);
 
-        simulation.on("tick", () => {
-          link
-            .attr("x1", (d) => d.source.x)
-            .attr("y1", (d) => d.source.y)
-            .attr("x2", (d) => d.target.x)
-            .attr("y2", (d) => d.target.y);
+                simulation.on("tick", () => {
+                    link
+                            .attr("x1", (d) => d.source.x)
+                            .attr("y1", (d) => d.source.y)
+                            .attr("x2", (d) => d.target.x)
+                            .attr("y2", (d) => d.target.y);
 
-          node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
-        });
+                    node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
+                });
 
-        function drag(simulation) {
-          function dragstarted(event, d) {
-            if (!event.active) simulation.alphaTarget(0.3).restart();
-            d.fx = d.x;
-            d.fy = d.y;
-          }
+                function drag(simulation) {
+                    function dragstarted(event, d) {
+                        if (!event.active) simulation.alphaTarget(0.3).restart();
+                        d.fx = d.x;
+                        d.fy = d.y;
+                    }
 
-          function dragged(event, d) {
-            d.fx = event.x;
-            d.fy = event.y;
-          }
+                    function dragged(event, d) {
+                        d.fx = event.x;
+                        d.fy = event.y;
+                    }
 
-          function dragended(event, d) {
-            if (!event.active) simulation.alphaTarget(0);
-            d.fx = null;
-            d.fy = null;
-          }
+                    function dragended(event, d) {
+                        if (!event.active) simulation.alphaTarget(0);
+                        d.fx = null;
+                        d.fy = null;
+                    }
 
-          return d3
-            .drag()
-            .on("start", dragstarted)
-            .on("drag", dragged)
-            .on("end", dragended);
-        }
-      });
-  </script>
-  ```
+                    return d3
+                            .drag()
+                            .on("start", dragstarted)
+                            .on("drag", dragged)
+                            .on("end", dragended);
+                }
+            });
+</script>
+```
 
 - **Explanation:**
     - This D3.js visualization uses a force-directed graph to display the family tree. Nodes represent family members,
       and links represent relationships such as parent-child or siblings. The tree can be dynamically updated based on
       user input, showing different parts of the family hierarchy.
 
-#### **4. Dynamic Interaction and Exploration**
+---
+
+#### **Dynamic Interaction and Exploration**
 
 - **User Input:**
 
-    - Enhance the application by allowing users to enter a person’s name, which then triggers a request to the backend
-      to fetch and display that person’s family tree.
+Enhance the application by allowing users to enter a person’s name, which then triggers a request to the backend to
+fetch and display that person’s family tree.
 
-  ```html
-  <input type="text" id="person-name" placeholder="Enter a name" />
-  <button onclick="loadFamilyTree()">Load Family Tree</button>
+```html
+<input type="text" id="person-name" placeholder="Enter a name"/>
+<button onclick="loadFamilyTree()">Load Family Tree</button>
 
-  <script>
+<script>
     function loadFamilyTree() {
-      const name = document.getElementById("person-name").value;
-      fetch(`/family-tree/${name}`)
-        .then((response) => response.json())
-        .then((data) => {
-          // Update the D3 visualization with the retrieved data
-        });
+        const name = document.getElementById("person-name").value;
+        fetch(`/family-tree/${name}`)
+                .then((response) => response.json())
+                .then((data) => {
+                    // Update the D3 visualization with the retrieved data
+                });
     }
-  </script>
-  ```
+</script>
+```
 
 - **Explanation:**
     - This allows users to explore the family tree interactively. They can enter different names to view the
       corresponding family trees, which the D3.js visualization updates dynamically.
 
-#### **5. Deploying the Application**
+---
+
+#### **Deploying the Application**
 
 - **Containerization with Docker:**
 
-    - Similar to the previous demo, containerize the FastAPI application to ensure it runs consistently across
-      environments.
+Containerize the FastHTML application to ensure it runs consistently across environments.
 
-  ```dockerfile
-  FROM python:3.9-slim
+```dockerfile
+FROM python:3.9-slim
 
-  WORKDIR /app
+WORKDIR /app
 
-  COPY requirements.txt requirements.txt
-  RUN pip install -r requirements.txt
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
 
-  COPY . .
+COPY . .
 
-  CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
-  ```
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
 
 - **Deployment to AWS:**
     - Deploy the application to AWS, using Elastic Beanstalk or ECS to manage and scale the service as needed. Ensure
       the application is accessible and performs well, even as the size of the family tree data grows.
 
+---
+
 ### **Final Thoughts**
 
 - **Interactive Family Tree Visualization:**
     - This demo illustrates how graph databases can be used to model and visualize complex hierarchical relationships,
-      like those in a family tree. The integration of FastAPI, Neo4j, and D3.js provides a powerful and flexible way to
-      explore
-
-these relationships interactively.
+      like those in a family tree. The integration of FastHTML, Neo4j, and D3.js provides a powerful and flexible way to
+      explore these relationships interactively.
 
 - **Potential Enhancements:**
     - Consider adding features such as saving and loading specific family trees, expanding nodes to reveal hidden family
       members, or even incorporating historical data and timelines into the visualization.
 
+---
+
 ### **Further Discussions**
 
-#### **1. LLMs and Graph Databases**
+#### **1. LLMs and Graph Dat
+
+abases**
 
 - **Enhancing Data Extraction:**
     - LLMs can assist in extracting entities and relationships from unstructured text (such as books, articles, or web
       pages) and automatically populating a graph database. This can significantly speed up the process of building
       complex knowledge graphs.
+
 - **Improving Query Generation:**
     - LLMs can understand natural language queries and convert them into Cypher queries, making graph databases more
-      accessible to non-technical users. For instance, a user could ask, "Show me all fantasy books written by British
-      authors," and the LLM could generate the appropriate Cypher query.
+      accessible to non-technical users. For instance, a user could ask, "Show me all family members related to John
+      Doe," and the LLM could generate the appropriate Cypher query.
 
 #### **DevOps with Docker and AWS:**
 

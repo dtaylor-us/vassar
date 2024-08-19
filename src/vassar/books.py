@@ -1,4 +1,4 @@
-from fasthtml.components import Nav, Header, A, Html, Link, Head, Title, Script, Body, Div
+from fasthtml.components import Nav, Header, A, Link, Head, Title, Script, Div, Main
 from fasthtml.fastapp import fast_app, serve
 from starlette.responses import FileResponse, JSONResponse
 
@@ -60,30 +60,19 @@ async def format_graph_data(data):
 @route("/")
 async def get(request):
     # Generate the HTML content using FastHTML
-    return Html(
-        Head(
-            Title("Books and Authors Graph"),
-            Link(
-                rel="stylesheet",
-                href="https://cdnjs.cloudflare.com/ajax/libs/tachyons/4.11.1/tachyons.min.css",
-                type="text/css",
-            ),
-            Link(rel="stylesheet", href="/public/css/styles.css", type="text/css"),
-        ),
-        Body(
-            Header(Nav(
+    return (Title("Books and Authors Graph"),
+            Head(Link(rel="stylesheet",
+                      href="https://cdnjs.cloudflare.com/ajax/libs/tachyons/4.11.1/tachyons.min.css",
+                      type="text/css"),
+                 Link(rel="stylesheet", href="/public/css/styles.css", type="text/css")),
+            Main(Header(Nav(
                 A("Graph DB Fundamentals", href="/", cls="link dim white b f6 f5-ns dib mr3"),
                 A("Home", href="/", cls="link dim light-gray f6 f5-ns dib mr3"),
-                cls="pa3 pa4-ns"
-            ), cls='bg-purple'),
-            Div(
-                Div(id="graph", cls="mt4"),
-                cls="center",
-            ),
-        ),
-        Script(src="https://d3js.org/d3.v6.min.js"),
-        Script(src="/public/js/graph.js"),
-    )
+                cls="pa3 pa4-ns"), cls='bg-purple'),
+                Div(Div(id="graph", cls="mt4"),
+                    cls="center")),
+            Script(src="https://d3js.org/d3.v6.min.js"),
+            Script(src="/public/js/graph.js"))
 
 
 if __name__ == "__main__":
