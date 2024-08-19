@@ -21,8 +21,8 @@ managed = true
 dev-dependencies = ["ruff>=0.6.1"]
 
 [tool.rye.scripts]
-webapp_dev = "rye run uvicorn vassar.main:app --reload-dir ."
-webapp = "rye run uvicorn vassar.main:app"
+webapp_dev = "rye run uvicorn vassar.books:app --reload-dir ."
+webapp = "rye run uvicorn vassar.books:app"
 
 [tool.pyright]
 venvPath = "."

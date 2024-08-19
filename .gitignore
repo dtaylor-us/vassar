@@ -14,3 +14,9 @@ wheels/
 .idea
 .sesskey
 */.env
+data/databases
+data/dbms
+data/server_id
+data/transactions
+logs/*.log
+
