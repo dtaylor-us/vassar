@@ -1,8 +1,13 @@
-from fasthtml.components import Nav, Header, A, Link, Head, Title, Script, Div, Main
+from typing import List
+
+from fasthtml.components import (
+    Nav, Header, A, Link, Head, Title, Script, Div, Main
+)
 from fasthtml.fastapp import fast_app, serve
+from neo4j import Record
 from starlette.responses import FileResponse, JSONResponse
 
-from vassar.database import get_neo4j_conn
+from vassar.database import get_async_driver, async_query_many
 
 STANDALONE_KEY = "Standalone"
 CHILDREN_KEY = "children"
@@ -12,6 +17,8 @@ GRAPH_DATA_QUERY = """
     OPTIONAL MATCH (b)-[:BELONGS_TO]->(s:Series)
     RETURN a.name AS author, b.title AS book, s.name AS series
     """
+
+DATABASE = "books"
 
 app, route = fast_app(
     debug=True,
@@ -26,13 +33,13 @@ async def get(fname: str, ext: str):
 
 @route("/graph-data")
 async def get(request):  # Query Neo4j database for authors and books
-    neo4j_conn = get_neo4j_conn()
-    data = neo4j_conn.query(GRAPH_DATA_QUERY)
-    root = await format_graph_data(data)
-    return JSONResponse(root)
+    async with get_async_driver(database=DATABASE) as driver:
+        data = await async_query_many(driver, GRAPH_DATA_QUERY)
+        root = format_graph_data(data)
+        return JSONResponse(root)
 
 
-async def format_graph_data(data):
+def format_graph_data(data: List[Record]):
     authors = {}
 
     for record in data:

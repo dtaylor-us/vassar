@@ -1,6 +1,15 @@
-from fasthtml.common import *
+from typing import List
 
-from vassar.database import get_neo4j_conn
+from fasthtml.components import (
+    Nav, A, Link, Head, Title, Script, Div,
+    Main, Span, I, Ul, Li, Button
+)
+from fasthtml.fastapp import fast_app, serve
+from neo4j import Record
+from starlette.responses import FileResponse, JSONResponse
+
+from vassar.books import DATABASE
+from vassar.database import async_query_many, get_async_driver
 
 app, rt = fast_app(live=True, debug=True)
 
@@ -9,13 +18,15 @@ MATCH (p:Person)-[:PARENT_OF]->(descendant:Person)
 RETURN p, descendant;
 """
 
+DATABASE = "family_tree"
+
 
 @rt("/{fname:path}.{ext:static}")
 async def get(fname: str, ext: str):
     return FileResponse(f"public/{fname}.{ext}")
 
 
-async def format_graph_data(data):
+def format_graph_data(data: List[Record]):
     nodes = {}
     for record in data:
         parent = record["p"]
@@ -45,11 +56,10 @@ async def format_graph_data(data):
 
 @rt("/tree")
 async def get(request):
-    neo4j_conn = get_neo4j_conn()
-    data = neo4j_conn.query(GRAPH_DATA_QUERY)
-    root = await format_graph_data(data)
-    return JSONResponse(root)
-
+    async with get_async_driver(database=DATABASE) as driver:
+        data = await async_query_many(driver, GRAPH_DATA_QUERY)
+        root = format_graph_data(data)
+        return JSONResponse(root)
 
 @rt('/')
 def get():     return (
@@ -97,3 +107,6 @@ def get():     return (
             });
         ''')
 )
+
+if __name__ == "__main__":
+    serve(port=8001, reload=True)
