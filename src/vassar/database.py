@@ -11,9 +11,15 @@ import os
 from typing import List
 
 from neo4j import (
-    AsyncGraphDatabase, GraphDatabase, Driver,
-    AsyncDriver, AsyncResult, Result,
-    EagerResult, Record
+    AsyncGraphDatabase,
+    GraphDatabase,
+    Driver,
+    AsyncDriver,
+    AsyncResult,
+    Result,
+    EagerResult,
+    Record,
+    RoutingControl,
 )
 
 
@@ -28,16 +34,24 @@ from neo4j import (
 # $ direnv allow
 # $ direnv edit
 
-def get_driver(database: str) -> Driver:
+
+def get_driver(database: str = None) -> Driver:
     uri = os.getenv("NEO4J_URI")
     auth = (os.getenv("NEO4J_USER"), os.getenv("NEO4J_PASSWORD"))
     return GraphDatabase.driver(uri=uri, auth=auth, database=database)
 
 
-def get_async_driver(database: str) -> AsyncDriver:
+def get_async_driver(database: str = None) -> AsyncDriver:
     uri = os.getenv("NEO4J_URI")
     auth = (os.getenv("NEO4J_USER"), os.getenv("NEO4J_PASSWORD"))
     return AsyncGraphDatabase.driver(uri=uri, auth=auth, database=database)
+
+
+def create_database(driver: Driver, name: str):
+    result = driver.execute_query(
+        f"CREATE DATABASE {name}", routing_=RoutingControl.WRITE
+    )
+    return result
 
 
 def query_one(driver: Driver, query: str) -> Record:
@@ -46,7 +60,7 @@ def query_one(driver: Driver, query: str) -> Record:
 
 
 def query_many(driver: Driver, query: str) -> List[Record]:
-    records = driver.execute_query(query, records_transformer_=EagerResult.records)
+    records = driver.execute_query(query, result_transformer_=EagerResult.records)
     return records
 
 
@@ -55,6 +69,6 @@ async def async_query_one(driver: AsyncDriver, query: str) -> Record:
     return record
 
 
-async def async_query_many(driver: AsyncDriver, query: str) -> List[Record]:
-    records = await driver.execute_query(query, records_transformer_=EagerResult.records)
-    return records
+async def async_query_many(driver: AsyncDriver, query: str) -> EagerResult:
+    results = await driver.execute_query(query)
+    return results
