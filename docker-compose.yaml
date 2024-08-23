@@ -1,13 +1,22 @@
-
 services:
+  webapp:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - NEO4J_URI=bolt://graphdb:7687
+      - NEO4J_USER=neo4j #you can change this to your username
+      - NEO4J_PASSWORD= Derek_password #you can change this to your password
+      - NEO4J_DATABASE=neo4j
+    depends_on:
+      - graphdb
+
   graphdb:
     image: neo4j:5.22.0
     ports:
       - "7474:7474"
       - "7687:7687"
     environment:
-      - NEO4J_AUTH=neo4j/password
-    volumes:
+      - NEO4J_AUTH=neo4j/Derek_password #you can change this to your username and password
       - ./data:/data
       - ./logs:/logs
-
