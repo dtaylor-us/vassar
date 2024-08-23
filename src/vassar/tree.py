@@ -20,8 +20,7 @@ from neo4j import Record, EagerResult
 from starlette.responses import FileResponse, JSONResponse
 from rich.console import Console
 
-from vassar.books import DATABASE
-from vassar.database import async_query_many, get_async_driver
+from vassar.database import async_query, get_async_driver
 
 
 console = Console()
@@ -73,8 +72,8 @@ def format_graph_data(data: EagerResult):
 
 @rt("/tree")
 async def get(request):
-    async with get_async_driver(database=DATABASE) as driver:
-        data = await async_query_many(driver, GRAPH_DATA_QUERY)
+    async with get_async_driver() as driver:
+        data = await async_query(driver, GRAPH_DATA_QUERY)
         root = format_graph_data(data)
         return JSONResponse(root)
 

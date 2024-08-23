@@ -7,7 +7,7 @@ from fasthtml.fastapp import fast_app, serve
 from neo4j import Record, EagerResult
 from starlette.responses import FileResponse, JSONResponse
 
-from vassar.database import get_async_driver, async_query_many
+from vassar.database import get_async_driver, async_query
 
 STANDALONE_KEY = "Standalone"
 CHILDREN_KEY = "children"
@@ -18,7 +18,6 @@ GRAPH_DATA_QUERY = """
     RETURN a.name AS author, b.title AS book, s.name AS series
     """
 
-DATABASE = "books"
 
 app, route = fast_app(
     debug=True,
@@ -33,8 +32,8 @@ async def get(fname: str, ext: str):
 
 @route("/graph-data")
 async def get(request):  # Query Neo4j database for authors and books
-    async with get_async_driver(database=DATABASE) as driver:
-        data = await async_query_many(driver, GRAPH_DATA_QUERY)
+    async with get_async_driver() as driver:
+        data = await async_query(driver, GRAPH_DATA_QUERY)
         root = format_graph_data(data)
         return JSONResponse(root)
 
