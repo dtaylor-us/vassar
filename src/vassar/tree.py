@@ -33,7 +33,7 @@ MATCH (p:Person)-[:PARENT_OF]->(descendant:Person)
 RETURN p, descendant;
 """
 
-DATABASE = "books"
+DATABASE = "neo4j"
 
 
 @rt("/{fname:path}.{ext:static}")
