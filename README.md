@@ -286,163 +286,48 @@ directory inside your Neo4j database folder.
 Files for the Author and Book demo can be found in the `data` directory of the project.
 
 ```cypher
-LOAD CSV WITH HEADERS FROM 'file:///books/series.csv' AS row
+LOAD CSV WITH HEADERS FROM 'file:///series.csv' AS row
 CREATE (:Series {series_id: row.series_id, name: row.name});
 
-LOAD CSV WITH HEADERS FROM 'file:///books/authors.csv' AS row
+LOAD CSV WITH HEADERS FROM 'file:///authors.csv' AS row
 CREATE (:Author {author_id: row.author_id, name: row.name, birthdate: row.birthdate, nationality: row.nationality});
 
 
-LOAD CSV WITH HEADERS FROM 'file:///books/books.csv' AS row
+LOAD CSV WITH HEADERS FROM 'file:///books.csv' AS row
 CREATE (:Book {book_id: row.book_id, title: row.title, publication_year: toInteger(row.publication_year), ISBN: row.ISBN, genre: row.genre});
 
-LOAD CSV WITH HEADERS FROM 'file:///books/wrote_relationship.csv' AS row
+LOAD CSV WITH HEADERS FROM 'file:///wrote_relationship.csv' AS row
 MATCH (a:Author {author_id: row.author_id}), (b:Book {book_id: row.book_id})
 CREATE (a)-[:WROTE {role: row.role, contribution_percentage: toFloat(row.contribution_percentage)}]->(b);
 
-LOAD CSV WITH HEADERS FROM 'file:///books/belongs_to_series.csv' AS row
+
+LOAD CSV WITH HEADERS FROM 'file:///belongs_to_series.csv' AS row
 MATCH (b:Book {book_id: row.book_id}), (s:Series {series_id: row.series_id})
 CREATE (b)-[:BELONGS_TO {book_number: toInteger(row.book_number)}]->(s);
 ```
 
-## **Building a Web Application with Python Tooling and D3.js**
+#### **Loading Person and Relationship Data**
+
+```cypher
+// Create uniqueness constraints
+CREATE CONSTRAINT FOR (p:Person) REQUIRE p.person_id IS UNIQUE;
+
+// Load persons data
+LOAD CSV WITH HEADERS FROM 'file:///persons.csv' AS row
+CREATE (:Person {person_id: toInteger(row.person_id), name: row.name, birthdate: date(row.birthdate), gender: row.gender, birthplace: row.birthplace});
+
+// Load parent-child relationships
+LOAD CSV WITH HEADERS FROM 'file:///relationships.csv' AS row
+MATCH (parent:Person {person_id: toInteger(row.parent_id)}), (child:Person {person_id: toInteger(row.child_id)})
+CREATE (parent)-[:PARENT_OF]->(child);
+```
+
+### **Building a Web Application with Python Tooling and D3.js**
 
 In this demo, we will provide more detailed setup instructions and implementation guidance for building a web
 application that visualizes the relationships between authors and books using Python, FastAPI, Neo4j, FastHTML, and
 D3.js. The project will be structured for easy development, using Rye for Python package management and FastHTML for
 templating.
-
-### Python  
-
-Python is a high-level, interpreted programming language with dynamic semantics. It's built-in data structures, combined  
-with dynamic typing and dynamic binding, make it an ideal language for scripting and rapid application development.  
-Python supports modules and packages, encouraging program modularity and code reuse.  
-  
-Python is particularly well-suited for data visualization for several reasons:  
-   
-1. **Accessible Syntax**: Python's clear and intuitive syntax makes it easy to learn, read, and write. This  
-   accessibility  
-   extends to its data visualization libraries, which are designed to be user-friendly and straightforward.  
-  
-2. **Extensive Libraries**: Python has a rich ecosystem of libraries, including several powerful options for data  visualization like Matplotlib, Seaborn, Plotly, and Bokeh. These libraries offer a wide range of features and  customization options, allowing you to create high-quality, interactive visualizations.  
-  
-3. **Community Support**: Python has a large and active community, which means you can find a wealth of resources,  tutorials, and code snippets to help you with your data visualization tasks. If you encounter a problem or need help, chances are someone else has already faced the same issue and you can find help and solutions online.  
-  
-4. **Data Science Support**: Python is a popular language in the data science community. Libraries like NumPy, Pandas,  and  SciPy provide robust support for tasks like data cleaning, analysis, and transformation, which are often necessary  
-   steps before data can be visualized.  
-
-### HTMX
-HTMX is a modern HTML-first AJAX library that allows you to access AJAX, CSS Transitions, WebSockets and Server Sent Events directly in HTML, using attributes, so you can build modern user interfaces with the simplicity and power of hypertext.
-
-Here's a basic example of how you can use HTMX to create a simple web page:
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>HTMX Example</title>
-    <script src="https://unpkg.com/htmx.org@1.6.1"></script>
-</head>
-<body>
-    <div id="content" hx-get="/updateContent" hx-trigger="every 5s">
-        Initial content
-    </div>
-</body>
-</html>
-```
-
-In this example, the `hx-get` attribute tells HTMX to issue a GET request to the `/updateContent` URL. The `hx-trigger` attribute tells HTMX to issue this request every 5 seconds. The response from the server will replace the innerHTML of the `div`.
-
-On the server side, you would have an endpoint `/updateContent` that returns the new content for the `div`. Here's a simple example using FastAPI:
-
-```python
-from fastapi import FastAPI
-
-app = FastAPI()
-
-@app.get("/updateContent")
-async def update_content():
-    # Replace with your actual logic to generate new content
-    return "Updated content"
-```
-
-
-In this example, the `/updateContent` endpoint returns a string "Updated content". This string will replace the innerHTML of the `div` every 5 seconds.
-
-Please note that you need to run the FastAPI application and replace `/updateContent` with the actual URL of the running application (e.g., `http://localhost:8000/updateContent`).
-
-### FastHTML
-
-FastHTML is a Python library that provides a simple and intuitive way to generate HTML content. It's built on top of the FastAPI framework, making it an excellent choice for building web applications with Python. Here are several reasons why FastHTML is well-suited for web development:
-
-1. **Simplicity**: FastHTML uses Python's syntax to generate HTML content, making it easy to learn and use. You can create HTML elements as Python objects and nest them to build complex structures.
-
-2. **Integration with FastAPI**: FastHTML is designed to work seamlessly with FastAPI, a modern, fast (high-performance), web framework for building APIs with Python 3.6+ based on standard Python type hints. This integration allows you to leverage FastAPI's features like dependency injection, routing, and validation in your web application.
-
-3. **Dynamic Content Generation**: With FastHTML, you can generate dynamic HTML content based on your application's data. This is done by passing data to your HTML elements and using Python's logic to manipulate and display the data.
-
-4. **Component-Based Structure**: FastHTML promotes a component-based structure, where you can create reusable HTML components and use them across your application. This can lead to cleaner and more maintainable code.
-
-Here's a basic example of how you can use FastHTML to create a simple web page:
-
-```python
-from fasthtml import Div, H1, P
-from fasthtml.fastapp import fast_app, serve
-
-app, route = fast_app()
-
-@route('/')
-def get():
-    return Div(
-        H1("Welcome to FastHTML!"),
-        P("FastHTML is a Python library for generating HTML content.")
-    )
-
-if __name__ == "__main__":
-    serve()
-
-```
-
-In this example, `Div`, `H1`, and `P` are HTML elements represented as Python objects. The `fast_app` function creates a FastAPI application, and the `route` decorator defines a route for the application. The `get` function returns a `Div` element containing an `H1` and a `P` element, which will be rendered as HTML when the route is accessed. The `serve` function starts the application.
-
-### D3.js
-
-D3.js (or just D3 for Data-Driven Documents) is a JavaScript library that allows you to bind arbitrary data to a Document Object Model (DOM), and then apply data-driven transformations to the document. It is a powerful tool for creating and manipulating complex visualizations on the web.
-
-Here are several reasons why D3.js is well-suited for data visualization:
-
-1. **Flexibility**: D3.js does not restrict you to a specific framework or chart type. You can create anything from a simple bar chart to complex infographics and interactive animations.
-
-2. **Data-Driven**: D3.js allows you to bind data to the DOM and apply transformations to the document based on that data. This makes it easier to generate complex visualizations and apply dynamic behaviors to them.
-
-3. **Integration with Web Standards**: D3.js uses standard web technologies such as SVG, HTML, and CSS. This means you can use it with any modern browser without requiring any additional plugins.
-
-4. **Powerful Tools**: D3.js provides powerful tools for creating scales, color schemes, shapes, layouts, and more. It also supports user interactions, animations, and transitions.
-
-Here's a basic example of how you can use D3.js to create a simple bar chart:
-
-```javascript
-// Sample data
-const data = [4, 8, 15, 16, 23, 42];
-
-// Create a scaling function
-const scale = d3.scaleLinear()
-    .domain([0, d3.max(data)])
-    .range([0, 420]);
-
-// Select the chart container and bind the data to it
-d3.select(".chart")
-  .selectAll("div")
-  .data(data)
-  .enter().append("div")
-    .style("width", d => scale(d) + "px")
-    .text(d => d);
-```
-
-In this example, `d3.scaleLinear()` creates a linear scaling function that maps the domain (input values) to the range (output values). The `d3.select()` function selects the chart container, and the `data()` function binds the data to the document. The `enter().append("div")` part creates a new div for each data point. The `style()` function sets the width of each bar based on the data, and the `text()` function sets the text of each bar to the data value.
-
-Please note that D3.js has a steep learning curve due to its flexibility and low-level nature. However, once you get the hang of it, you can create almost any kind of data visualization you can imagine.
 
 ---
 
@@ -457,12 +342,25 @@ web-app/
 │   ├── app/
 │   │   ├── __init__.py
 │   │   ├── database.py        # Neo4j database connection
-│   │   ├── main.py            # FastHTML application setup
+│   │   ├── main.py            # FastAPI application setup
 │   │   └── public/
 │   │       └── js/
 │   │           └── graph.js   # D3.js code
+│   └── tests/
+│       ├── __pycache__/
+│       │   ├── __init__.cpython-312.pyc
+│       │   ├── database.cpython-312.pyc
+│       │   └── main.cpython-312.pyc
+│       └── test_api.py        # Unit tests for the API
 └── .env                       # Environment variables
 ```
+
+### **Setting Up the Backend with FastAPI**
+
+#### **FastAPI Overview**
+
+FastAPI is a high-performance web framework suitable for building REST APIs. It supports Python type hints, asynchronous
+request handling, and automatic generation of OpenAPI docs.
 
 #### **Installing Dependencies with Rye**
 
@@ -493,83 +391,76 @@ Rye is a toolchain for Python that manages packages, virtual environments, and b
 **`database.py`:**
 
 ```python
-"""
-This module provides functions for connecting to a Neo4j database and executing queries.
-
-The following environment variables must be set:
-- NEO4J_URI: The URI of the Neo4j database
-- NEO4J_USER: The username for the Neo4j database
-- NEO4J_PASSWORD: The password for the Neo4j database
-"""
-
 import os
-from typing import List
-
-from neo4j import (
-    AsyncGraphDatabase,
-    GraphDatabase,
-    Driver,
-    AsyncDriver,
-    AsyncResult,
-    Result,
-    EagerResult,
-    Record,
-    RoutingControl,
-)
-
-def get_driver(database: str = None) -> Driver:
-    uri = os.getenv("NEO4J_URI")
-    auth = (os.getenv("NEO4J_USER"), os.getenv("NEO4J_PASSWORD"))
-    return GraphDatabase.driver(uri=uri, auth=auth, database=database)
+from dotenv import load_dotenv
+from neo4j import GraphDatabase
+from contextlib import asynccontextmanager
 
 
-def get_async_driver(database: str = None) -> AsyncDriver:
-    uri = os.getenv("NEO4J_URI")
-    auth = (os.getenv("NEO4J_USER"), os.getenv("NEO4J_PASSWORD"))
-    return AsyncGraphDatabase.driver(uri=uri, auth=auth, database=database)
+class Neo4jConnection:
+    def __init__(self, uri, user, password, database):
+        self._driver = GraphDatabase.driver(uri, auth=(user, password))
+        self._database = database
+
+    def close(self):
+        self._driver.close()
+
+    @asynccontextmanager
+    async def session(self):
+        session = self._driver.session(database=self._database)
+        try:
+            yield session
+        finally:
+            session.close()
+
+    def verify_connection(self):
+        try:
+            with self._driver.session(database=self._database) as session:
+                result = session.run("RETURN 1")
+                if result.single()[0] == 1:
+                    print("Connection to Neo4j is successful!")
+                else:
+                    print("Connection to Neo4j failed.")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
+    def query(self, query, parameters=None):
+        with self._driver.session(database=self._database) as session:
+            result = session.run(query, parameters)
+            return [record for record in result]
 
 
-def create_database(driver: Driver, name: str):
-    result = driver.execute_query(
-        f"CREATE DATABASE {name}", routing_=RoutingControl.WRITE
-    )
-    return result
+def get_neo4j_conn():
+    load_dotenv()
 
+    # Load and print credentials for debugging
+    neo4j_uri = os.getenv("NEO4J_URI")
+    neo4j_user = os.getenv("NEO4J_USER")
+    neo4j_password = os.getenv("NEO4J_PASSWORD")
+    neo4j_database = os.getenv(
+        "NEO4J_DATABASE", "neo4j"
+    )  # Default to 'neo4j' if not specified
 
-def query_one(driver: Driver, query: str) -> Record:
-    record = driver.execute_query(query, record_transformer_=Result.single)
-    return record
+    print(f"Using Neo4j URI: {neo4j_uri}")
+    print(f"Using Neo4j User: {neo4j_user}")
+    print(f"Using Neo4j Database: {neo4j_database}")
 
+    neo4j_conn = Neo4jConnection(neo4j_uri, neo4j_user, neo4j_password, neo4j_database)
+    # Verify connectivity
+    neo4j_conn.verify_connection()
 
-def query_many(driver: Driver, query: str) -> List[Record]:
-    records = driver.execute_query(query, result_transformer_=EagerResult.records)
-    return records
-
-
-async def async_query_one(driver: AsyncDriver, query: str) -> Record:
-    record = await driver.execute_query(query, record_transformer_=AsyncResult.single)
-    return record
-
-
-async def async_query_many(driver: AsyncDriver, query: str) -> EagerResult:
-    results = await driver.execute_query(query)
-    return results
+    return neo4j_conn
 
 ```
 
 **`main.py`:**
 
 ```python
-from typing import List
-
-from fasthtml.components import (
-    Nav, Header, A, Link, Head, Title, Script, Div, Main, H2
-)
+from fasthtml.components import Nav, Header, A, Html, Link, Head, Title, Script, Body, Div
 from fasthtml.fastapp import fast_app, serve
-from neo4j import Record, EagerResult
 from starlette.responses import FileResponse, JSONResponse
 
-from vassar.database import get_async_driver, async_query_many
+from vassar.database import get_neo4j_conn
 
 STANDALONE_KEY = "Standalone"
 CHILDREN_KEY = "children"
@@ -579,8 +470,6 @@ GRAPH_DATA_QUERY = """
     OPTIONAL MATCH (b)-[:BELONGS_TO]->(s:Series)
     RETURN a.name AS author, b.title AS book, s.name AS series
     """
-
-DATABASE = "books"
 
 app, route = fast_app(
     debug=True,
@@ -595,16 +484,16 @@ async def get(fname: str, ext: str):
 
 @route("/graph-data")
 async def get(request):  # Query Neo4j database for authors and books
-    async with get_async_driver(database=DATABASE) as driver:
-        data = await async_query_many(driver, GRAPH_DATA_QUERY)
-        root = format_graph_data(data)
-        return JSONResponse(root)
+    neo4j_conn = get_neo4j_conn()
+    data = neo4j_conn.query(GRAPH_DATA_QUERY)
+    root = await format_graph_data(data)
+    return JSONResponse(root)
 
 
-def format_graph_data(data: EagerResult):
+async def format_graph_data(data):
     authors = {}
 
-    for record in data.records:
+    for record in data:
         author = record["author"]
         book = record["book"]
         series = record["series"] or STANDALONE_KEY
@@ -629,19 +518,30 @@ def format_graph_data(data: EagerResult):
 @route("/")
 async def get(request):
     # Generate the HTML content using FastHTML
-    return (Title("Books and Authors Graph"),
-            Head(Link(rel="stylesheet",
-                      href="https://cdnjs.cloudflare.com/ajax/libs/tachyons/4.11.1/tachyons.min.css",
-                      type="text/css"),
-                 Link(rel="stylesheet", href="/public/css/styles.css", type="text/css")),
-            Nav(
+    return Html(
+        Head(
+            Title("Books and Authors Graph"),
+            Link(
+                rel="stylesheet",
+                href="https://cdnjs.cloudflare.com/ajax/libs/tachyons/4.11.1/tachyons.min.css",
+                type="text/css",
+            ),
+            Link(rel="stylesheet", href="/public/css/styles.css", type="text/css"),
+        ),
+        Body(
+            Header(Nav(
                 A("Graph DB Fundamentals", href="/", cls="link dim white b f6 f5-ns dib mr3"),
                 A("Home", href="/", cls="link dim light-gray f6 f5-ns dib mr3"),
-                cls="pa3 pa4-ns"),
-            H2("Books and Authors Visualization", cls="mt5 tc"),
-            Main(Div(Div(id="graph", cls="mt4"), cls="center")),
-            Script(src="https://d3js.org/d3.v6.min.js"),
-            Script(src="/public/js/graph.js"))
+                cls="pa3 pa4-ns"
+            ), cls='bg-purple'),
+            Div(
+                Div(id="graph", cls="mt4"),
+                cls="center",
+            ),
+        ),
+        Script(src="https://d3js.org/d3.v6.min.js"),
+        Script(src="/public/js/graph.js"),
+    )
 
 
 if __name__ == "__main__":
@@ -651,114 +551,130 @@ if __name__ == "__main__":
 
 #### **Adding D3.js Visualization**
 
-**`public/js/graph.js`:**
+**`static/js/graph.js`:**
 
 ```javascript
 document.addEventListener("DOMContentLoaded", async () => {
-  // Fetch the data from the backend
-  const response = await fetch("/graph-data");
-  const data = await response.json();
+    // Fetch the data from the backend
+    const response = await fetch("/graph-data");
+    const data = await response.json();
 
-  // Utility function to truncate text
-  function truncateText(text, maxLength) {
-    return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
-  }
+    // Utility function to truncate text
+    function truncateText(text, maxLength) {
+        return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
+    }
 
-  // Set the dimensions and radius of the sunburst
-  const width = 928;
-  const height = 928;
-  const radius = Math.min(width, height) / 2;
+    // Set the dimensions and radius of the sunburst
+    const width = 928;
+    const height = 928;
+    const radius = Math.min(width, height) / 2;
 
-  // Create the partition layout
-  const partition = d3.partition()
-    .size([2 * Math.PI, radius]);
+    // Create the partition layout
+    const partition = d3.partition()
+        .size([2 * Math.PI, radius]);
 
-  // Convert the data into a hierarchy and apply partition layout
-  const root = partition(d3.hierarchy(data)
-    .sum(d => d.value || 1) // Use value if present, otherwise 1 for equal sizing
-    .sort((a, b) => b.value - a.value)
-  );
+    // Convert the data into a hierarchy and apply partition layout
+    const root = partition(d3.hierarchy(data)
+        .sum(d => d.value || 1) // Use value if present, otherwise 1 for equal sizing
+        .sort((a, b) => b.value - a.value)
+    );
 
-  // Create a color scale based on the root author's children length
-  const color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, data.children.length + 1));
+    // Create a color scale based on the root author's children length
+    const color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, data.children.length + 1));
 
-  // Create the SVG container centered on the screen
-  const svg = d3.select("#graph")
-      .append("svg")
-      .attr("width", width)
-      .attr("height", height)
-      .style("display", "block")
-      .style("margin", "0 auto")
-      .append("g")
-      .attr("transform", `translate(${width / 2},${height / 2})`);
+    // Create the SVG container centered on the screen
+    const svg = d3.select("#graph")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .style("display", "block")
+        .style("margin", "0 auto")
+        .append("g")
+        .attr("transform", `translate(${width / 2},${height / 2})`);
 
-  // Define the arc generator with padding for visual separation
-  const arc = d3.arc()
-    .startAngle(d => d.x0)
-    .endAngle(d => d.x1)
-    .padAngle(d => Math.min((d.x1 - d.x0) / 2, 0.005))
-    .padRadius(radius / 2)
-    .innerRadius(d => d.y0)
-    .outerRadius(d => d.y1 - 1);
+    // Define the arc generator with padding for visual separation
+    const arc = d3.arc()
+        .startAngle(d => d.x0)
+        .endAngle(d => d.x1)
+        .padAngle(d => Math.min((d.x1 - d.x0) / 2, 0.005))
+        .padRadius(radius / 2)
+        .innerRadius(d => d.y0)
+        .outerRadius(d => d.y1 - 1);
 
-// Create a tooltip div that is hidden by default
-const tooltip = d3.select("body").append("div")
-  .style("position", "absolute")
-  .style("visibility", "hidden")
-  .style("background", "#fff")
-  .style("border", "1px solid #ccc")
-  .style("padding", "8px")
-  .style("border-radius", "4px")
-  .style("box-shadow", "0px 0px 10px rgba(0, 0, 0, 0.1)")
-  .style("font-family", "sans-serif")
-  .style("color", "black")  // Ensure the text color is black
-  .style("font-size", "12px");
+    // Create a tooltip div that is hidden by default
+    const tooltip = d3.select("body").append("div")
+        .style("position", "absolute")
+        .style("visibility", "hidden")
+        .style("background", "#fff")
+        .style("border", "1px solid #ccc")
+        .style("padding", "8px")
+        .style("border-radius", "4px")
+        .style("box-shadow", "0px 0px 10px rgba(0, 0, 0, 0.1)")
+        .style("font-family", "sans-serif")
+        .style("font-size", "12px");
 
+    // Draw the arcs (sunburst segments)
+    const paths = svg.append("g")
+        .attr("fill-opacity", 0.6)
+        .selectAll("path")
+        .data(root.descendants().filter(d => d.depth))
+        .join("path")
+        .attr("fill", d => {
+            while (d.depth > 1) d = d.parent;
+            return color(d.data.name);
+        })
+        .attr("d", arc)
+        .on("mouseover", function (event, d) {
+            tooltip.style("visibility", "visible")
+                .text(d.data.name); // Display the full text in the tooltip
+            d3.select(this).attr("fill-opacity", 1); // Darken the opacity on hover
+        })
+        .on("mousemove", function (event) {
+            tooltip.style("top", (event.pageY - 10) + "px")
+                .style("left", (event.pageX + 10) + "px");
+        })
+        .on("mouseout", function (event, d) {
+            tooltip.style("visibility", "hidden");
+            d3.select(this).attr("fill-opacity", 0.6); // Reset the opacity after hover
+        });
 
-  // Draw the arcs (sunburst segments)
-  const paths = svg.append("g")
-    .attr("fill-opacity", 0.6)
-    .selectAll("path")
-    .data(root.descendants().filter(d => d.depth))
-    .join("path")
-    .attr("fill", d => { while (d.depth > 1) d = d.parent; return color(d.data.name); })
-    .attr("d", arc)
-    .on("mouseover", function(event, d) {
-      tooltip.style("visibility", "visible")
-        .text(d.data.name); // Display the full text in the tooltip
-      d3.select(this).attr("fill-opacity", 1); // Darken the opacity on hover
-    })
-    .on("mousemove", function(event) {
-      tooltip.style("top", (event.pageY - 10) + "px")
-        .style("left", (event.pageX + 10) + "px");
-    })
-    .on("mouseout", function(event, d) {
-      tooltip.style("visibility", "hidden");
-      d3.select(this).attr("fill-opacity", 0.6); // Reset the opacity after hover
-    });
-
-  // Add text labels with truncation and proper rotation and alignment
-  svg.append("g")
-    .attr("pointer-events", "none")
-    .attr("text-anchor", "middle")
-    .attr("font-size", 10)
-    .attr("font-family", "sans-serif")
-    .selectAll("text")
-    .data(root.descendants().filter(d => d.depth && (d.y0 + d.y1) / 2 * (d.x1 - d.x0) > 10))
-    .join("text")
-    .attr("transform", function(d) {
-      const x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
-      const y = (d.y0 + d.y1) / 2;
-      return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
-    })
-    .attr("dy", "0.35em")
-    .text(d => truncateText(d.data.name, 15)) // Truncate the text if necessary
-    .append("title")
-    .text(d => d.data.name); // Ensure full text appears on hover
+    // Add text labels with truncation and proper rotation and alignment
+    svg.append("g")
+        .attr("pointer-events", "none")
+        .attr("text-anchor", "middle")
+        .attr("font-size", 10)
+        .attr("font-family", "sans-serif")
+        .selectAll("text")
+        .data(root.descendants().filter(d => d.depth && (d.y0 + d.y1) / 2 * (d.x1 - d.x0) > 10))
+        .join("text")
+        .attr("transform", function (d) {
+            const x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
+            const y = (d.y0 + d.y1) / 2;
+            return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
+        })
+        .attr("dy", "0.35em")
+        .text(d => truncateText(d.data.name, 15)) // Truncate the text if necessary
+        .append("title")
+        .text(d => d.data.name); // Ensure full text appears on hover
 });
 ```
 
-### Running the Application
+#### **Adding Static Files**
+
+**`static/css/style.css`:**
+
+```css
+body {
+    font-family: Arial, sans-serif;
+}
+
+#graph {
+    margin: 20px;
+    border: 1px solid #ccc;
+}
+```
+
+### **3. Running the Application**
 
 1. **Start the server using Uvicorn:**
 
@@ -772,8 +688,6 @@ const tooltip = d3.select("body").append("div")
 
 #### **Deploying the Application**
 
-TODO
-
 ### **Building a Web Application to Visualize a Family Tree with Python Tooling and D3.js**
 
 In this demo, we'll walk through the process of creating a web application that visualizes a family tree using a graph
@@ -781,7 +695,7 @@ database schema. The application will allow users to explore the hierarchical re
 parent-child and sibling relationships. The backend will be powered by FastAPI, and the frontend will use D3.js to
 render the family tree.
 
-
+---
 
 #### **Designing the Family Tree Graph Schema**
 
@@ -803,6 +717,13 @@ render the family tree.
 - **Properties:**
     - `relationship`: String (e.g., "Mother", "Father")
 
+**SIBLING_OF**
+
+- **From:** Person
+- **To:** Person
+- **Properties:**
+    - `relationship`: String (e.g., "Brother", "Sister")
+
 **Example Data:**
 
 Nodes:
@@ -815,354 +736,266 @@ Relationships:
 
 - `(John Doe)-[:PARENT_OF]->(Alice Doe)`
 - `(Jane Doe)-[:PARENT_OF]->(Alice Doe)`
+- `(John Doe)-[:SIBLING_OF]->(Jane Doe)`
 
-
-##### **Loading Author and Book Data**
-
-Files for the Author and Book demo can be found in the `data` directory of the project.
-
-```cypher
-// Create uniqueness constraints
-CREATE CONSTRAINT FOR (p:Person) REQUIRE p.person_id IS UNIQUE;
-
-// Load persons data
-LOAD CSV WITH HEADERS FROM 'file:///vassar/persons.csv' AS row
-CREATE (:Person {person_id: toInteger(row.person_id), name: row.name, birthdate: date(row.birthdate), gender: row.gender, birthplace: row.birthplace});
-
-// Load parent-child relationships
-LOAD CSV WITH HEADERS FROM 'file:///vassar/relationships.csv' AS row
-MATCH (parent:Person {person_id: toInteger(row.parent_id)}), (child:Person {person_id: toInteger(row.child_id)})
-CREATE (parent)-[:PARENT_OF]->(child);
-```
+---
 
 #### **Setting Up the Backend with FastHTML**
 
-**`tree.py`:**
+**FastHTML Application Setup:**
+
+We'll use FastHTML, a Python framework that allows for fast and efficient rendering of HTML in the backend while
+interacting with Neo4j.
 
 ```python
-from fasthtml.components import (
-    Nav,
-    A,
-    Link,
-    Head,
-    Title,
-    Script,
-    Div,
-    Main,
-    Span,
-    I,
-    Ul,
-    Li,
-    Button, P, H2,
-)
 from fasthtml.fastapp import fast_app, serve
-from neo4j import Record, EagerResult
-from starlette.responses import FileResponse, JSONResponse
-from rich.console import Console
+from neo4j import GraphDatabase
 
-from vassar.books import DATABASE
-from vassar.database import async_query_many, get_async_driver
+app, route = fast_app(debug=True, live=True)
 
-
-console = Console()
-
-app, rt = fast_app(live=True, debug=True)
-
-GRAPH_DATA_QUERY = """
-MATCH (p:Person)-[:PARENT_OF]->(descendant:Person)
-RETURN p, descendant;
-"""
-
-DATABASE = "ne04j"
-
-@rt("/{fname:path}.{ext:static}")
-async def get(fname: str, ext: str):
-    return FileResponse(f"public/{fname}.{ext}")
+driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", "password"))
 
 
-def format_graph_data(data: EagerResult):
-    nodes = {}
-    for record in data.records:
-        parent = record["p"]
-        descendant = record["descendant"]
-
-        # Ensure parent node exists
-        if parent["name"] not in nodes:
-            nodes[parent["name"]] = {"name": parent["name"], "children": []}
-
-        # Ensure descendant node exists
-        if descendant["name"] not in nodes:
-            nodes[descendant["name"]] = {"name": descendant["name"], "children": []}
-
-        # Append the descendant to the parent's children
-        nodes[parent["name"]]["children"].append(nodes[descendant["name"]])
-
-    # Find the root nodes (nodes without parents)
-    root_candidates = set(nodes.keys()) - {
-        record["descendant"]["name"] for record in data.records
-    }
-    roots = [nodes[name] for name in root_candidates]
-
-    # If there's only one root, return it; otherwise, create a single root node for all
-    if len(roots) == 1:
-        return roots[0]
-    else:
-        return {"name": "Tree", "children": roots}
+@app.on_event("shutdown")
+def shutdown():
+    driver.close()
 
 
-@rt("/tree")
-async def get(request):
-    async with get_async_driver(database=DATABASE) as driver:
-        data = await async_query_many(driver, GRAPH_DATA_QUERY)
-        root = format_graph_data(data)
-        return JSONResponse(root)
-
-
-@rt('/')
-def get(): return (
-    Title("Family Tree Visualization"),
-    Head(
-        Link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/tachyons/4.11.1/tachyons.min.css",
-             type="text/css"),
-        Link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css")
-    ),
-    Nav(
-        A("Graph DB Fundamentals", href="/", cls="link dim white b f6 f5-ns dib mr3"),
-        A("Home", href="/", cls="link dim light-gray f6 f5-ns dib mr3"),
-        cls="pa3 pa4-ns"
-    ),
-    Main(
-        Div(
-            Span(I(cls="fas fa-question-circle light-purple mb3"),
-                 P("Help", cls="ml2"), cls="flex pointer info-icon"),
-            Div(
-                Div(Span("close X", cls="close-btn mb2 f6 light-purple pointer"),
-                    cls="flex justify-end items-center"),
-                Ul(
-                    Li("Zoom: Mouse wheel / touchpad scroll"),
-                    Li("Pan: Click and drag."),
-                    cls="pl3"
-                ),
-                cls="info-banner bg-navy pa3 ba br-rounded b--light-silver br2 shadow-1 dn"
-            ),
-            cls="info-container fixed bottom-2 right-2"
-        ),
-        H2("Family Tree Visualization", cls="tc"),
-        Button("Expand All", id="expand-all", cls="f6 link dim br-rounded ph3 pv2 mb4 mt2 dib white bg-dark-blue"),
-        Button("Collapse All", id="collapse-all", cls="dn f6 link dim br-rounded ph3 pv2 mb4 mt2  white bg-dark-blue"),
-        Div(id="family-tree"),
-        cls="container"
-    ),
-
-    Script(src="https://d3js.org/d3.v6.min.js"),
-    Script(src="/public/js/tree.js")
-)
-
-
-if __name__ == "__main__":
-    serve(port=8001, reload=True)
-
+def get_db():
+    with driver.session() as session:
+        yield session
 ```
+
+- **API Endpoint for Family Tree:**
+
+Create an endpoint to retrieve the entire family tree starting from a specific person:
+
+```python
+@route("/family-tree/{person_name}")
+async def get_family_tree(request, person_name: str):
+    query = """
+    MATCH (p:Person {name: $person_name})-[:PARENT_OF*0..]->(descendants)
+    OPTIONAL MATCH (p)-[:SIBLING_OF]->(siblings)
+    RETURN p, descendants, siblings
+    """
+    with driver.session() as session:
+        result = session.run(query, person_name=person_name)
+        nodes = []
+        links = []
+        for record in result:
+            parent = record["p"]
+            nodes.append({"id": parent["name"], "group": 1})
+            if "descendants" in record:
+                for child in record["descendants"]:
+                    nodes.append({"id": child["name"], "group": 2})
+                    links.append({"source": parent["name"], "target": child["name"], "value": 1})
+            if "siblings" in record:
+                for sibling in record["siblings"]:
+                    nodes.append({"id": sibling["name"], "group": 3})
+                    links.append({"source": parent["name"], "target": sibling["name"], "value": 1})
+        return {"nodes": nodes, "links": links}
+```
+
+- **Explanation:**
+    - This endpoint retrieves all descendants and siblings of a specified person. It returns the family members as nodes
+      and the relationships between them as links.
+
+---
 
 #### **Building the Frontend with D3.js**
-**`public/js/tree.js`:**
-```js
-document.addEventListener("DOMContentLoaded", async () => {
-    // Fetch the data from the backend
-    const response = await fetch("/tree");
-    const data = await response.json();
 
-    const width = 1200;
-    const height = 800;
-    const margin = {top: 40, right: 120, bottom: 20, left: 120};
-    const cardWidth = 150;
-    const cardHeight = 50;
-    // Define the background color here
-    const backgroundColor = "#1c1c1c";  // Use the color from the uploaded image
+- **Visualizing the Family Tree:**
 
-    const svg = d3
-        .select("#family-tree")
-        .append("svg")
-        .attr("width", width + margin.right + margin.left)
-        .attr("height", height + margin.top + margin.bottom)
-        .style("background-color", backgroundColor)  // Set the background color
-        .style("border", "1px solid white")  // Add a white border
-        .call(d3.zoom().on("zoom", function (event) {
-            svg.attr("transform", event.transform);
-        }))
-        .append("g")
-        .attr("transform", `translate(${margin.left},${margin.top})`);
+Use D3.js to create a hierarchical tree that represents the family structure. Here’s a basic example:
 
-    const root = d3.hierarchy(data);
-    root.x0 = height / 2;
-    root.y0 = 0;
+```html
 
-    // Tree layout with increased separation between columns
-    const treeLayout = d3.tree()
-        .size([height, width - margin.left - margin.right])
-        .separation((a, b) => (a.parent === b.parent ? 2 : 3)); // Increase separation between sibling nodes
+<div id="family-tree"></div>
+<script src="https://d3js.org/d3.v6.min.js"></script>
+<script>
+    fetch("/family-tree/John Doe")
+            .then((response) => response.json())
+            .then((data) => {
+                const width = 800,
+                        height = 600;
 
-    const update = (source) => {
-        // Assign the new positions for the nodes
-        treeLayout(root);
+                const svg = d3
+                        .select("#family-tree")
+                        .append("svg")
+                        .attr("width", width)
+                        .attr("height", height);
 
-        const nodes = root.descendants();
-        const links = root.descendants().slice(1);
+                const simulation = d3
+                        .forceSimulation(data.nodes)
+                        .force(
+                                "link",
+                                d3.forceLink(data.links).id((d) => d.id)
+                        )
+                        .force("charge", d3.forceManyBody())
+                        .force("center", d3.forceCenter(width / 2, height / 2));
 
-        // Adjust y position to increase space between columns
-        nodes.forEach(d => {
-            d.y = d.depth * 250;  // Increase horizontal spacing by adjusting depth multiplier
-            d.x *= 1.5;  // Increase vertical spacing by scaling the x position
-        });
+                const link = svg
+                        .append("g")
+                        .attr("stroke", "#999")
+                        .attr("stroke-opacity", 0.6)
+                        .selectAll("line")
+                        .data(data.links)
+                        .join("line")
+                        .attr("stroke-width", (d) => Math.sqrt(d.value));
 
-        // Update the nodes
-        const node = svg.selectAll("g.node")
-            .data(nodes, d => d.id || (d.id = ++i));
+                const node = svg
+                        .append("g")
+                        .attr("stroke", "#fff")
+                        .attr("stroke-width", 1.5)
+                        .selectAll("circle")
+                        .data(data.nodes)
+                        .join("circle")
+                        .attr("r", 5)
+                        .attr("fill", (d) =>
+                                d.group === 1 ? "#ff5722" : d.group === 2 ? "#03a9f4" : "#4caf50"
+                        )
+                        .call(drag(simulation));
 
-        const nodeEnter = node.enter().append("g")
-            .attr("class", "node")
-            .attr("transform", d => `translate(${source.y0},${source.x0})`)
-            .on("click", click);
+                node.append("title").text((d) => d.id);
 
-        nodeEnter.append("rect")
-            .attr("width", cardWidth)
-            .attr("height", cardHeight)
-            .attr("x", -cardWidth / 2)
-            .attr("y", -cardHeight / 2)
-            .attr("fill", d => d._children ? "#9b3df4" : "#e1bcff")
-            .attr("stroke", "#e1bcff")
-            .attr("stroke-width", "2px")
-            .attr("rx", 10)
-            .attr("ry", 10);
+                simulation.on("tick", () => {
+                    link
+                            .attr("x1", (d) => d.source.x)
+                            .attr("y1", (d) => d.source.y)
+                            .attr("x2", (d) => d.target.x)
+                            .attr("y2", (d) => d.target.y);
 
-        nodeEnter.append("text")
-            .attr("dy", ".35em")
-            .attr("x", 0)
-            .attr("text-anchor", "middle")
-            .attr("fill", "#000")
-            .text(d => d.data.name);
+                    node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
+                });
 
-        const nodeUpdate = nodeEnter.merge(node);
+                function drag(simulation) {
+                    function dragstarted(event, d) {
+                        if (!event.active) simulation.alphaTarget(0.3).restart();
+                        d.fx = d.x;
+                        d.fy = d.y;
+                    }
 
-        nodeUpdate.transition()
-            .duration(750)
-            .attr("transform", d => `translate(${d.y},${d.x})`);
+                    function dragged(event, d) {
+                        d.fx = event.x;
+                        d.fy = event.y;
+                    }
 
-        nodeUpdate.select("rect")
-            .attr("fill", d => d._children ? "#9b3df4" : "#e1bcff");
+                    function dragended(event, d) {
+                        if (!event.active) simulation.alphaTarget(0);
+                        d.fx = null;
+                        d.fy = null;
+                    }
 
-        nodeUpdate.select("text")
-            .style("fill-opacity", 1);
-
-        const nodeExit = node.exit().transition()
-            .duration(750)
-            .attr("transform", d => `translate(${source.y},${source.x})`)
-            .remove();
-
-        nodeExit.select("rect")
-            .attr("width", 1e-6)
-            .attr("height", 1e-6);
-
-        nodeExit.select("text")
-            .style("fill-opacity", 1e-6);
-
-        // Update the links
-        const link = svg.selectAll("path.link")
-            .data(links, d => d.id);
-
-        const linkEnter = link.enter().insert("path", "g")
-            .attr("class", "link")
-            .attr("d", d => {
-                const o = {x: source.x0, y: source.y0};
-                return diagonal({source: o, target: o});
-            })
-            .attr("fill", "none")
-            .attr("stroke", "#ccc")
-            .attr("stroke-width", "2px");
-
-        const linkUpdate = linkEnter.merge(link);
-
-        linkUpdate.transition()
-            .duration(750)
-            .attr("d", d => diagonal({source: d.parent, target: d}));
-
-        const linkExit = link.exit().transition()
-            .duration(750)
-            .attr("d", d => {
-                const o = {x: source.x, y: source.y};
-                return diagonal({source: o, target: o});
-            })
-            .remove();
-
-        nodes.forEach(d => {
-            d.x0 = d.x;
-            d.y0 = d.y;
-        });
-    };
-
-    const click = (event, d) => {
-        if (d.children) {
-            d._children = d.children;
-            d.children = null;
-        } else {
-            d.children = d._children;
-            d._children = null;
-        }
-        update(d);
-    };
-
-    const collapse = (d) => {
-        if (d.children) {
-            d._children = d.children;
-            d._children.forEach(collapse);
-            d.children = null;
-        }
-    };
-
-    const expandAll = () => {
-        root.each(d => {
-            if (d._children) {
-                d.children = d._children;
-                d._children = null;
-            }
-        });
-        update(root);
-        document.querySelector("#expand-all").style.display = "none";
-        document.querySelector("#collapse-all").style.display = "block";
-    };
-
-    const collapseAll = () => {
-        root.each(collapse);
-        update(root);
-        document.querySelector("#expand-all").style.display = "block";
-        document.querySelector("#collapse-all").style.display = "none";
-    }
-
-    d3.select("#expand-all").on("click", expandAll);
-    d3.select("#collapse-all").on("click", collapseAll);
-
-    const diagonal = d3.linkHorizontal()
-        .x(d => d.y)
-        .y(d => d.x);
-
-    let i = 0;
-    root.children.forEach(collapse); // Start with all nodes collapsed
-    update(root);
-});
-
-document.querySelector('.info-icon').addEventListener('mouseenter', () => {
-    const banner = document.querySelector('.info-banner');
-    banner.style.display = banner.style.display === 'block' ? 'none' : 'block';
-});
-
-document.querySelector('.close-btn').addEventListener('click', () => {
-    document.querySelector('.info-banner').style.display = 'none';
-});
+                    return d3
+                            .drag()
+                            .on("start", dragstarted)
+                            .on("drag", dragged)
+                            .on("end", dragended);
+                }
+            });
+</script>
 ```
 
+- **Explanation:**
+    - This D3.js visualization uses a force-directed graph to display the family tree. Nodes represent family members,
+      and links represent relationships such as parent-child or siblings. The tree can be dynamically updated based on
+      user input, showing different parts of the family hierarchy.
+
+---
+
+#### **Dynamic Interaction and Exploration**
+
+- **User Input:**
+
+Enhance the application by allowing users to enter a person’s name, which then triggers a request to the backend to
+fetch and display that person’s family tree.
+
+```html
+<input type="text" id="person-name" placeholder="Enter a name"/>
+<button onclick="loadFamilyTree()">Load Family Tree</button>
+
+<script>
+    function loadFamilyTree() {
+        const name = document.getElementById("person-name").value;
+        fetch(`/family-tree/${name}`)
+                .then((response) => response.json())
+                .then((data) => {
+                    // Update the D3 visualization with the retrieved data
+                });
+    }
+</script>
+```
+
+- **Explanation:**
+    - This allows users to explore the family tree interactively. They can enter different names to view the
+      corresponding family trees, which the D3.js visualization updates dynamically.
+
+---
+
 #### **Deploying the Application**
-TODO
 
-#### **Containerization with Docker:**
-TODO
+- **Containerization with Docker:**
 
+Containerize the FastHTML application to ensure it runs consistently across environments.
+
+```dockerfile
+FROM python:3.9-slim
+
+WORKDIR /app
+
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+
+COPY . .
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+- **Deployment to AWS:**
+    - Deploy the application to AWS, using Elastic Beanstalk or ECS to manage and scale the service as needed. Ensure
+      the application is accessible and performs well, even as the size of the family tree data grows.
+
+---
+
+### **Final Thoughts**
+
+- **Interactive Family Tree Visualization:**
+    - This demo illustrates how graph databases can be used to model and visualize complex hierarchical relationships,
+      like those in a family tree. The integration of FastHTML, Neo4j, and D3.js provides a powerful and flexible way to
+      explore these relationships interactively.
+
+- **Potential Enhancements:**
+    - Consider adding features such as saving and loading specific family trees, expanding nodes to reveal hidden family
+      members, or even incorporating historical data and timelines into the visualization.
+
+---
+
+### **Further Discussions**
+
+#### **1. LLMs and Graph Dat
+
+abases**
+
+- **Enhancing Data Extraction:**
+    - LLMs can assist in extracting entities and relationships from unstructured text (such as books, articles, or web
+      pages) and automatically populating a graph database. This can significantly speed up the process of building
+      complex knowledge graphs.
+
+- **Improving Query Generation:**
+    - LLMs can understand natural language queries and convert them into Cypher queries, making graph databases more
+      accessible to non-technical users. For instance, a user could ask, "Show me all family members related to John
+      Doe," and the LLM could generate the appropriate Cypher query.
+
+#### **DevOps with Docker and AWS:**
+
+     - Docker enables the easy deployment of applications in containers, ensuring consistency across environments. AWS provides cloud infrastructure that can scale your graph database application as needed. Discuss the importance of these tools in deploying and maintaining graph database applications in a production environment.
+
+### **Conclusion**
+
+- **Recap:**
+    - Summarize the key points covered in the session, emphasizing the versatility and efficiency of graph databases for
+      modeling complex relationships. Highlight the ease of querying and managing graph data with Cypher, and how modern
+      tooling can further enhance the power of graph databases.
+- **Encouragement:**
+    - Encourage attendees to explore graph databases in their own projects, experiment with Cypher queries, and consider
+      how LLMs and modern web frameworks can be integrated into their workflows to build innovative applications.
