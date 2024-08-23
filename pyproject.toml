@@ -9,8 +9,8 @@ dependencies = [
     "neo4j>=5.23.1",
     "python-fasthtml>=0.4.3",
     "rich>=13.7.1",
-    "instruct-easy @ git+https://github.com/chiefkemist/instruct-easy",
     "typer>=0.12.4",
+    "instruct-easy @ git+https://github.com/chiefkemist/instruct-easy",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"

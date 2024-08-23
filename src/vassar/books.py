@@ -1,6 +1,8 @@
 from typing import List
 
-from fasthtml.components import Nav, Header, A, Link, Head, Title, Script, Div, Main, H2
+from fasthtml.components import (
+    Nav, Header, A, Link, Head, Title, Script, Div, Main, H2
+)
 from fasthtml.fastapp import fast_app, serve
 from neo4j import Record, EagerResult
 from starlette.responses import FileResponse, JSONResponse
@@ -72,7 +74,7 @@ def format_graph_data(data: EagerResult):
 async def get(request):
     # Generate the HTML content using FastHTML
     return (
-        Title("Books and Authors Graph"),
+        Title("Books and Authors"),
         Head(
             Link(
                 rel="stylesheet",

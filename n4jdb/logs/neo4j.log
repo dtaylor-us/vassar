@@ -86,6 +86,25 @@
 2024-08-22 04:19:40.722+0000 WARN  [bolt-40] The client is unauthorized due to authentication failure.
 2024-08-22 04:19:40.726+0000 WARN  [bolt-41] The client is unauthorized due to authentication failure.
 2024-08-22 04:19:40.743+0000 WARN  [bolt-42] The client is unauthorized due to authentication failure.
+2024-08-23 21:24:39.300+0000 INFO  Logging config in use: File '/var/lib/neo4j/conf/user-logs.xml'
+2024-08-23 21:24:39.325+0000 INFO  Starting...
+2024-08-23 21:24:40.320+0000 INFO  This instance is ServerId{1e3f2d67} (1e3f2d67-4082-47f1-b09f-ca17f5b10ce4)
+2024-08-23 21:24:41.467+0000 INFO  ======== Neo4j 5.22.0 ========
+2024-08-23 21:24:43.801+0000 INFO  Anonymous Usage Data is being sent to Neo4j, see https://neo4j.com/docs/usage-data/
+2024-08-23 21:24:44.193+0000 INFO  Bolt enabled on 0.0.0.0:7687.
+2024-08-23 21:24:44.840+0000 INFO  HTTP enabled on 0.0.0.0:7474.
+2024-08-23 21:24:44.842+0000 INFO  Remote interface available at http://localhost:7474/
+2024-08-23 21:24:44.847+0000 INFO  id: 25DBC48C2755FEBF0C7FC4179E0D1113AA335EA71720B2824F6A16CB7F08E756
+2024-08-23 21:24:44.848+0000 INFO  name: system
+2024-08-23 21:24:44.849+0000 INFO  creationDate: 2024-08-23T21:24:42.385Z
+2024-08-23 21:24:44.850+0000 INFO  Started.
+2024-08-23 21:25:54.475+0000 WARN  [bolt-0] The client is unauthorized due to authentication failure.
+2024-08-23 21:25:54.475+0000 WARN  [bolt-1] The client is unauthorized due to authentication failure.
+2024-08-23 21:26:21.023+0000 WARN  [bolt-2] The client is unauthorized due to authentication failure.
+2024-08-23 21:26:21.024+0000 WARN  [bolt-3] The client has provided incorrect authentication details too many times in a row.
+2024-08-23 21:28:38.142+0000 WARN  [bolt-4] The client is unauthorized due to authentication failure.
+2024-08-23 21:28:48.548+0000 WARN  [bolt-5] The client is unauthorized due to authentication failure.
+2024-08-23 21:30:42.667+0000 WARN  [bolt-6] The client is unauthorized due to authentication failure.
 2024-08-22 21:37:39.870+0000 INFO  Logging config in use: Embedded default config 'default-user-logs.xml'
 2024-08-22 21:37:39.875+0000 WARN  Use of deprecated setting 'dbms.directories.import'. It is replaced by 'server.directories.import'.
 2024-08-22 21:37:39.875+0000 WARN  Use of deprecated setting 'dbms.connector.http.enabled'. It is replaced by 'server.http.enabled'.

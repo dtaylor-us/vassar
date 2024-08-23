@@ -27,7 +27,7 @@ CYPHER_EXPERT_CTX = [
 
 @prompt(
     context=CYPHER_EXPERT_CTX,
-    model=LLMModel.GPT4_Omni,
+    model=LLMModel.LLAMA3_70b,
 )
 def gen_cypher_query(_: str, input: CypherQueryData = None) -> str:
     console.log(f"DESCRIPTION::::{input.description}")

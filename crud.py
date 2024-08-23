@@ -14,23 +14,23 @@ err_console = Console(stderr=True)
 app = typer.Typer()
 
 
-@app.command()
-def database_schema():
-    schema_json = db.database_schema()
-    console.print_json(schema_json)
-    return schema_json
+# @app.command()
+# def database_schema():
+#     schema_json = db.database_schema()
+#     console.print_json(schema_json)
+#     return schema_json
 
 
 @app.command()
-def adhoc_query(natural_language_query: str):
+def adhoc_query(natural_language_query: str = "Who are the children of Mary Doe?"):
     schema_json = db.database_schema()
     query_str = f"""
     Given the following Neo4j database schema
-    
+
     {schema_json}
-    
+
     generate a Cypher query that matches the following natural language query:
-    
+
     {natural_language_query}
     """
     cypher_query = gen_cypher_query(query_str)
