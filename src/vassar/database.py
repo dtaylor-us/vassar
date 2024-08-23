@@ -1,68 +1,60 @@
+"""
+This module provides functions for connecting to a Neo4j database and executing queries.
+
+The following environment variables must be set:
+- NEO4J_URI: The URI of the Neo4j database
+- NEO4J_USER: The username for the Neo4j database
+- NEO4J_PASSWORD: The password for the Neo4j database
+"""
+
 import os
-from dotenv import load_dotenv
-from neo4j import GraphDatabase
-from contextlib import asynccontextmanager
+from typing import List
 
-class Neo4jConnection:
-    def __init__(self, uri, user, password, database):
-        self._driver = GraphDatabase.driver(uri, auth=(user, password))
-        self._database = database
-
-    def close(self):
-        self._driver.close()
-
-    @asynccontextmanager
-    async def session(self):
-        session = self._driver.session(database=self._database)
-        try:
-            yield session
-        finally:
-            session.close()
-
-    def verify_connection(self):
-        try:
-            with self._driver.session(database=self._database) as session:
-                result = session.run("RETURN 1")
-                if result.single()[0] == 1:
-                    print("Connection to Neo4j is successful!")
-                else:
-                    print("Connection to Neo4j failed.")
-        except Exception as e:
-            print(f"An error occurred: {e}")
-
-    def query(self, query, parameters=None):
-        with self._driver.session(database=self._database) as session:
-            result = session.run(query, parameters)
-            return [record for record in result]
+from neo4j import (
+    AsyncGraphDatabase, GraphDatabase, Driver,
+    AsyncDriver, AsyncResult, Result,
+    EagerResult, Record
+)
 
 
-def get_neo4j_conn():
-    load_dotenv()
-    # /path/to/project/.envrc
-    # Contents:
-    # export NEO4J_URI=bolt://localhost:7687
-    # export NEO4J_USER=neo4j
-    # export NEO4J_PASSWORD=neo4j
-    # export NEO4J_DATABASE=neo4j
-    #
-    # From inside the project directory, run:
-    # $ direnv allow
-    # $ direnv edit
+# /path/to/project/.envrc
+# Contents:
+# export NEO4J_URI=bolt://localhost:7687
+# export NEO4J_USER=neo4j
+# export NEO4J_PASSWORD=neo4j
+# export NEO4J_DATABASE=neo4j
+#
+# From inside the project directory, run:
+# $ direnv allow
+# $ direnv edit
 
-    # Load and print credentials for debugging
-    neo4j_uri = os.getenv("NEO4J_URI")
-    neo4j_user = os.getenv("NEO4J_USER")
-    neo4j_password = os.getenv("NEO4J_PASSWORD")
-    neo4j_database = os.getenv(
-        "NEO4J_DATABASE", "neo4j"
-    )  # Default to 'neo4j' if not specified
+def get_driver(database: str) -> Driver:
+    uri = os.getenv("NEO4J_URI")
+    auth = (os.getenv("NEO4J_USER"), os.getenv("NEO4J_PASSWORD"))
+    return GraphDatabase.driver(uri=uri, auth=auth, database=database)
 
-    print(f"Using Neo4j URI: {neo4j_uri}")
-    print(f"Using Neo4j User: {neo4j_user}")
-    print(f"Using Neo4j Database: {neo4j_database}")
 
-    neo4j_conn = Neo4jConnection(neo4j_uri, neo4j_user, neo4j_password, neo4j_database)
-    # Verify connectivity
-    neo4j_conn.verify_connection()
+def get_async_driver(database: str) -> AsyncDriver:
+    uri = os.getenv("NEO4J_URI")
+    auth = (os.getenv("NEO4J_USER"), os.getenv("NEO4J_PASSWORD"))
+    return AsyncGraphDatabase.driver(uri=uri, auth=auth, database=database)
 
-    return neo4j_conn
+
+def query_one(driver: Driver, query: str) -> Record:
+    record = driver.execute_query(query, record_transformer_=Result.single)
+    return record
+
+
+def query_many(driver: Driver, query: str) -> List[Record]:
+    records = driver.execute_query(query, records_transformer_=EagerResult.records)
+    return records
+
+
+async def async_query_one(driver: AsyncDriver, query: str) -> Record:
+    record = await driver.execute_query(query, record_transformer_=AsyncResult.single)
+    return record
+
+
+async def async_query_many(driver: AsyncDriver, query: str) -> List[Record]:
+    records = await driver.execute_query(query, records_transformer_=EagerResult.records)
+    return records

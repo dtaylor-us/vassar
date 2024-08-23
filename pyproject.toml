@@ -21,9 +21,10 @@ managed = true
 dev-dependencies = ["ruff>=0.6.1"]
 
 [tool.rye.scripts]
-books_app_dev = "rye run uvicorn vassar.books:app --reload-dir ."
-tree_app_dev = "rye run uvicorn vassar.tree:app --reload-dir ."
-webapp = "rye run uvicorn vassar.books:app"
+books_app_dev = "rye run uvicorn vassar.books:app --port 8000 --reload-dir ."
+tree_app_dev = "rye run uvicorn vassar.tree:app --port 8001 --reload-dir ."
+books_app = "rye run uvicorn vassar.books:app --port 8000"
+tree_app = "rye run uvicorn vassar.tree:app --port 8000"
 
 [tool.pyright]
 venvPath = "."
