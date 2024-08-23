@@ -7,20 +7,18 @@ The following environment variables must be set:
 - NEO4J_PASSWORD: The password for the Neo4j database
 """
 
+import json
 import os
-from typing import List
 
 from neo4j import (
     AsyncGraphDatabase,
     GraphDatabase,
     Driver,
     AsyncDriver,
-    AsyncResult,
-    Result,
     EagerResult,
-    Record,
-    RoutingControl,
 )
+
+from crud import console
 
 
 # /path/to/project/.envrc
@@ -36,39 +34,100 @@ from neo4j import (
 
 
 def get_driver(database: str = None) -> Driver:
+    database = database or os.getenv("NEO4J_DATABASE")
     uri = os.getenv("NEO4J_URI")
     auth = (os.getenv("NEO4J_USER"), os.getenv("NEO4J_PASSWORD"))
     return GraphDatabase.driver(uri=uri, auth=auth, database=database)
 
 
 def get_async_driver(database: str = None) -> AsyncDriver:
+    database = database or os.getenv("NEO4J_DATABASE")
     uri = os.getenv("NEO4J_URI")
     auth = (os.getenv("NEO4J_USER"), os.getenv("NEO4J_PASSWORD"))
     return AsyncGraphDatabase.driver(uri=uri, auth=auth, database=database)
 
 
-def create_database(driver: Driver, name: str):
-    result = driver.execute_query(
-        f"CREATE DATABASE {name}", routing_=RoutingControl.WRITE
-    )
-    return result
-
-
-def query_one(driver: Driver, query: str) -> Record:
-    record = driver.execute_query(query, record_transformer_=Result.single)
-    return record
-
-
-def query_many(driver: Driver, query: str) -> List[Record]:
-    records = driver.execute_query(query, result_transformer_=EagerResult.records)
+def query(driver: Driver, query: str) -> EagerResult:
+    console.log(f"EXECUTING_QUERY:::: {query}")
+    records = driver.execute_query(query)
     return records
 
 
-async def async_query_one(driver: AsyncDriver, query: str) -> Record:
-    record = await driver.execute_query(query, record_transformer_=AsyncResult.single)
-    return record
-
-
-async def async_query_many(driver: AsyncDriver, query: str) -> EagerResult:
+async def async_query(driver: AsyncDriver, query: str) -> EagerResult:
+    console.log(f"EXECUTING_QUERY:::: {query}")
     results = await driver.execute_query(query)
     return results
+
+
+SCHEMA_QUERY = """
+CALL db.schema.nodeTypeProperties() 
+YIELD nodeType, nodeLabels, propertyName, propertyTypes, mandatory 
+RETURN collect({
+    type: nodeType,
+    labels: nodeLabels,
+    name: propertyName,
+    type: propertyTypes,
+    mandatory: mandatory
+}) AS schema
+"""
+
+NODE_QUERY = """
+CALL db.schema.nodeTypeProperties() 
+YIELD nodeType, nodeLabels, propertyName, propertyTypes, mandatory 
+RETURN collect({
+    type: nodeType,
+    labels: nodeLabels,
+    name: propertyName,
+    type: propertyTypes,
+    mandatory: mandatory
+}) AS nodes_schema
+"""
+
+RELATIONSHIP_QUERY = """
+MATCH ()-[r]->() 
+RETURN type(r) AS relationship_type, keys(r) AS properties 
+LIMIT 100  // Adjust as needed to avoid performance issue
+"""
+
+
+def database_schema():
+    driver = get_driver()
+    node_result = query(driver, NODE_QUERY)
+    relationship_result = query(driver, RELATIONSHIP_QUERY)
+    nodes = node_result.records[0][0]
+    relationships = relationship_result.records[0][0]
+    schema = dict(nodes=nodes, relationships=relationships)
+    schema_json = json.dumps(schema, indent=4)
+    return schema_json
+
+
+async def async_database_schema():
+    driver = get_async_driver()
+    node_result = await query(driver, NODE_QUERY)
+    relationship_result = await query(driver, RELATIONSHIP_QUERY)
+    nodes = node_result.records[0][0]
+    relationships = relationship_result.records[0][0]
+    schema = dict(nodes=nodes, relationships=relationships)
+    schema_json = json.dumps(schema, indent=4)
+    return schema_json
+
+
+# def database_schema():
+#     driver = get_driver()
+#     result = query(
+#         driver,
+#         SCHEMA_QUERY,
+#     )
+#     schema = result.records[0][0]
+#     schema_json = json.dumps(schema, indent=4)
+#     return schema_json
+
+# async def async_database_schema():
+#     driver = get_async_driver()
+#     result = await async_query(
+#         driver,
+#         SCHEMA_QUERY,
+#     )
+#     schema = result.records[0][0]
+#     schema_json = json.dumps(schema, indent=4)
+#     return schema_json

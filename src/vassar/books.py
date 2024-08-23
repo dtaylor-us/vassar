@@ -1,13 +1,11 @@
 from typing import List
 
-from fasthtml.components import (
-    Nav, Header, A, Link, Head, Title, Script, Div, Main, H2
-)
+from fasthtml.components import Nav, Header, A, Link, Head, Title, Script, Div, Main, H2
 from fasthtml.fastapp import fast_app, serve
 from neo4j import Record, EagerResult
 from starlette.responses import FileResponse, JSONResponse
 
-from vassar.database import get_async_driver, async_query_many
+from vassar.database import get_async_driver, async_query
 
 STANDALONE_KEY = "Standalone"
 CHILDREN_KEY = "children"
@@ -18,7 +16,6 @@ GRAPH_DATA_QUERY = """
     RETURN a.name AS author, b.title AS book, s.name AS series
     """
 
-DATABASE = "books"
 
 app, route = fast_app(
     debug=True,
@@ -33,8 +30,8 @@ async def get(fname: str, ext: str):
 
 @route("/graph-data")
 async def get(request):  # Query Neo4j database for authors and books
-    async with get_async_driver(database=DATABASE) as driver:
-        data = await async_query_many(driver, GRAPH_DATA_QUERY)
+    async with get_async_driver() as driver:
+        data = await async_query(driver, GRAPH_DATA_QUERY)
         root = format_graph_data(data)
         return JSONResponse(root)
 
@@ -51,7 +48,14 @@ def format_graph_data(data: EagerResult):
             authors[author] = {NAME_KEY: author, CHILDREN_KEY: []}
 
         # Check if the series exists under this author
-        series_node = next((item for item in authors[author][CHILDREN_KEY] if item[NAME_KEY] == series), None)
+        series_node = next(
+            (
+                item
+                for item in authors[author][CHILDREN_KEY]
+                if item[NAME_KEY] == series
+            ),
+            None,
+        )
 
         if not series_node:
             series_node = {NAME_KEY: series, CHILDREN_KEY: []}
@@ -67,19 +71,30 @@ def format_graph_data(data: EagerResult):
 @route("/")
 async def get(request):
     # Generate the HTML content using FastHTML
-    return (Title("Books and Authors Graph"),
-            Head(Link(rel="stylesheet",
-                      href="https://cdnjs.cloudflare.com/ajax/libs/tachyons/4.11.1/tachyons.min.css",
-                      type="text/css"),
-                 Link(rel="stylesheet", href="/public/css/styles.css", type="text/css")),
-            Nav(
-                A("Graph DB Fundamentals", href="/", cls="link dim white b f6 f5-ns dib mr3"),
-                A("Home", href="/", cls="link dim light-gray f6 f5-ns dib mr3"),
-                cls="pa3 pa4-ns"),
-            H2("Books and Authors Visualization", cls="mt5 tc"),
-            Main(Div(Div(id="graph", cls="mt4"), cls="center")),
-            Script(src="https://d3js.org/d3.v6.min.js"),
-            Script(src="/public/js/graph.js"))
+    return (
+        Title("Books and Authors Graph"),
+        Head(
+            Link(
+                rel="stylesheet",
+                href="https://cdnjs.cloudflare.com/ajax/libs/tachyons/4.11.1/tachyons.min.css",
+                type="text/css",
+            ),
+            Link(rel="stylesheet", href="/public/css/styles.css", type="text/css"),
+        ),
+        Nav(
+            A(
+                "Graph DB Fundamentals",
+                href="/",
+                cls="link dim white b f6 f5-ns dib mr3",
+            ),
+            A("Home", href="/", cls="link dim light-gray f6 f5-ns dib mr3"),
+            cls="pa3 pa4-ns",
+        ),
+        H2("Books and Authors Visualization", cls="mt5 tc"),
+        Main(Div(Div(id="graph", cls="mt4"), cls="center")),
+        Script(src="https://d3js.org/d3.v6.min.js"),
+        Script(src="/public/js/graph.js"),
+    )
 
 
 if __name__ == "__main__":
