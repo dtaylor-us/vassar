@@ -1,0 +1,21 @@
+person_id,name,birthdate,gender,birthplace
+1,John Doe,1980-01-15,Male,New York
+2,Jane Doe,1978-03-22,Female,New York
+3,Alice Doe,2005-07-18,Female,New York
+4,Robert Doe,2007-05-30,Male,New York
+5,Michael Doe,1950-04-10,Male,New York
+6,Susan Doe,1952-09-15,Female,New York
+7,William Doe,1920-12-01,Male,New York
+8,Mary Doe,1922-07-20,Female,New York
+9,James Doe,1890-03-11,Male,New York
+10,Elizabeth Doe,1892-06-25,Female,New York
+11,Charles Doe,1860-02-10,Male,New York
+12,Emma Doe,1862-11-30,Female,New York
+13,Henry Doe,1830-08-05,Male,New York
+14,Clara Doe,1832-10-12,Female,New York
+15,George Doe,1800-03-15,Male,New York
+16,Anna Doe,1802-07-05,Female,New York
+17,David Doe,1770-01-01,Male,New York
+18,Sarah Doe,1772-03-14,Female,New York
+19,Thomas Doe,1740-05-25,Male,New York
+20,Martha Doe,1742-09-07,Female,New York
