@@ -72,12 +72,11 @@ async def get(request):
                       href="https://cdnjs.cloudflare.com/ajax/libs/tachyons/4.11.1/tachyons.min.css",
                       type="text/css"),
                  Link(rel="stylesheet", href="/public/css/styles.css", type="text/css")),
-            Main(Header(Nav(
+            Nav(
                 A("Graph DB Fundamentals", href="/", cls="link dim white b f6 f5-ns dib mr3"),
                 A("Home", href="/", cls="link dim light-gray f6 f5-ns dib mr3"),
-                cls="pa3 pa4-ns"), cls='bg-purple'),
-                Div(Div(id="graph", cls="mt4"),
-                    cls="center")),
+                cls="pa3 pa4-ns bg-purple"),
+            Main(Div(Div(id="graph", cls="mt4"), cls="center")),
             Script(src="https://d3js.org/d3.v6.min.js"),
             Script(src="/public/js/graph.js"))
 

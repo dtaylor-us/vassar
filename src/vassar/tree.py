@@ -18,9 +18,13 @@ from fasthtml.components import (
 from fasthtml.fastapp import fast_app, serve
 from neo4j import Record, EagerResult
 from starlette.responses import FileResponse, JSONResponse
+from rich.console import Console
 
 from vassar.books import DATABASE
 from vassar.database import async_query_many, get_async_driver
+
+
+console = Console()
 
 app, rt = fast_app(live=True, debug=True)
 
@@ -29,7 +33,7 @@ MATCH (p:Person)-[:PARENT_OF]->(descendant:Person)
 RETURN p, descendant;
 """
 
-DATABASE = "neo4j"
+DATABASE = "books"
 
 
 @rt("/{fname:path}.{ext:static}")
