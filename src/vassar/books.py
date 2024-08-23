@@ -1,10 +1,10 @@
 from typing import List
 
 from fasthtml.components import (
-    Nav, Header, A, Link, Head, Title, Script, Div, Main
+    Nav, Header, A, Link, Head, Title, Script, Div, Main, H2
 )
 from fasthtml.fastapp import fast_app, serve
-from neo4j import Record
+from neo4j import Record, EagerResult
 from starlette.responses import FileResponse, JSONResponse
 
 from vassar.database import get_async_driver, async_query_many
@@ -39,10 +39,10 @@ async def get(request):  # Query Neo4j database for authors and books
         return JSONResponse(root)
 
 
-def format_graph_data(data: List[Record]):
+def format_graph_data(data: EagerResult):
     authors = {}
 
-    for record in data:
+    for record in data.records:
         author = record["author"]
         book = record["book"]
         series = record["series"] or STANDALONE_KEY
@@ -75,7 +75,8 @@ async def get(request):
             Nav(
                 A("Graph DB Fundamentals", href="/", cls="link dim white b f6 f5-ns dib mr3"),
                 A("Home", href="/", cls="link dim light-gray f6 f5-ns dib mr3"),
-                cls="pa3 pa4-ns bg-purple"),
+                cls="pa3 pa4-ns"),
+            H2("Books and Authors Visualization", cls="mt5 tc"),
             Main(Div(Div(id="graph", cls="mt4"), cls="center")),
             Script(src="https://d3js.org/d3.v6.min.js"),
             Script(src="/public/js/graph.js"))

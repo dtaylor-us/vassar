@@ -45,17 +45,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     .innerRadius(d => d.y0)
     .outerRadius(d => d.y1 - 1);
 
-  // Create a tooltip div that is hidden by default
-  const tooltip = d3.select("body").append("div")
-    .style("position", "absolute")
-    .style("visibility", "hidden")
-    .style("background", "#fff")
-    .style("border", "1px solid #ccc")
-    .style("padding", "8px")
-    .style("border-radius", "4px")
-    .style("box-shadow", "0px 0px 10px rgba(0, 0, 0, 0.1)")
-    .style("font-family", "sans-serif")
-    .style("font-size", "12px");
+// Create a tooltip div that is hidden by default
+const tooltip = d3.select("body").append("div")
+  .style("position", "absolute")
+  .style("visibility", "hidden")
+  .style("background", "#fff")
+  .style("border", "1px solid #ccc")
+  .style("padding", "8px")
+  .style("border-radius", "4px")
+  .style("box-shadow", "0px 0px 10px rgba(0, 0, 0, 0.1)")
+  .style("font-family", "sans-serif")
+  .style("color", "black")  // Ensure the text color is black
+  .style("font-size", "12px");
+
 
   // Draw the arcs (sunburst segments)
   const paths = svg.append("g")

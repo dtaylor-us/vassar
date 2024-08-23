@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const data = await response.json();
 
     const width = 1200;
-    const height = 1200;
+    const height = 800;
     const margin = {top: 40, right: 120, bottom: 20, left: 120};
     const cardWidth = 150;
     const cardHeight = 50;
@@ -17,7 +17,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         .attr("width", width + margin.right + margin.left)
         .attr("height", height + margin.top + margin.bottom)
         .style("background-color", backgroundColor)  // Set the background color
-        .call(d3.zoom().on("zoom", function(event) {
+        .style("border", "1px solid white")  // Add a white border
+        .call(d3.zoom().on("zoom", function (event) {
             svg.attr("transform", event.transform);
         }))
         .append("g")
@@ -59,8 +60,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             .attr("height", cardHeight)
             .attr("x", -cardWidth / 2)
             .attr("y", -cardHeight / 2)
-            .attr("fill", d => d._children ? "#ff5722" : "#ffccbc")
-            .attr("stroke", "steelblue")
+            .attr("fill", d => d._children ? "#9b3df4" : "#e1bcff")
+            .attr("stroke", "#e1bcff")
             .attr("stroke-width", "2px")
             .attr("rx", 10)
             .attr("ry", 10);
@@ -79,7 +80,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             .attr("transform", d => `translate(${d.y},${d.x})`);
 
         nodeUpdate.select("rect")
-            .attr("fill", d => d._children ? "#ff5722" : "#ffccbc");
+            .attr("fill", d => d._children ? "#9b3df4" : "#e1bcff");
 
         nodeUpdate.select("text")
             .style("fill-opacity", 1);
@@ -157,9 +158,19 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         });
         update(root);
+        document.querySelector("#expand-all").style.display = "none";
+        document.querySelector("#collapse-all").style.display = "block";
     };
 
+    const collapseAll = () => {
+        root.each(collapse);
+        update(root);
+        document.querySelector("#expand-all").style.display = "block";
+        document.querySelector("#collapse-all").style.display = "none";
+    }
+
     d3.select("#expand-all").on("click", expandAll);
+    d3.select("#collapse-all").on("click", collapseAll);
 
     const diagonal = d3.linkHorizontal()
         .x(d => d.y)
@@ -168,4 +179,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     let i = 0;
     root.children.forEach(collapse); // Start with all nodes collapsed
     update(root);
+});
+
+document.querySelector('.info-icon').addEventListener('mouseenter', () => {
+    const banner = document.querySelector('.info-banner');
+    banner.style.display = banner.style.display === 'block' ? 'none' : 'block';
+});
+
+document.querySelector('.close-btn').addEventListener('click', () => {
+    document.querySelector('.info-banner').style.display = 'none';
 });

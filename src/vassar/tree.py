@@ -13,7 +13,7 @@ from fasthtml.components import (
     I,
     Ul,
     Li,
-    Button, P,
+    Button, P, H2,
 )
 from fasthtml.fastapp import fast_app, serve
 from neo4j import Record, EagerResult
@@ -79,72 +79,45 @@ async def get(request):
         return JSONResponse(root)
 
 
-@rt("/")
-def get():
-    return (
-        Title("Family Tree Visualization"),
-        Head(
-            Link(
-                rel="stylesheet",
-                href="https://cdnjs.cloudflare.com/ajax/libs/tachyons/4.11.1/tachyons.min.css",
-                type="text/css",
-            ),
-            Link(
-                rel="stylesheet",
-                href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css",
-            ),
-        ),
-        Nav(
-            A(
-                "Graph DB Fundamentals",
-                href="/",
-                cls="link dim white b f6 f5-ns dib mr3",
-            ),
-            A("Home", href="/", cls="link dim light-gray f6 f5-ns dib mr3"),
-            cls="pa3 pa4-ns",
-        ),
-        Main(
+@rt('/')
+def get(): return (
+    Title("Family Tree Visualization"),
+    Head(
+        Link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/tachyons/4.11.1/tachyons.min.css",
+             type="text/css"),
+        Link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css")
+    ),
+    Nav(
+        A("Graph DB Fundamentals", href="/", cls="link dim white b f6 f5-ns dib mr3"),
+        A("Home", href="/", cls="link dim light-gray f6 f5-ns dib mr3"),
+        cls="pa3 pa4-ns"
+    ),
+    Main(
+        Div(
+            Span(I(cls="fas fa-question-circle light-purple mb3"),
+                 P("Help", cls="ml2"), cls="flex pointer info-icon"),
             Div(
-                Span(
-                    I(cls="fas fa-question-circle blue mb3"),
-                    P("Instructions", cls="ml2"),
-                    cls="flex pointer info-icon",
+                Div(Span("close X", cls="close-btn mb2 f6 light-purple pointer"),
+                    cls="flex justify-end items-center"),
+                Ul(
+                    Li("Zoom: Mouse wheel / touchpad scroll"),
+                    Li("Pan: Click and drag."),
+                    cls="pl3"
                 ),
-                Div(
-                    Div(
-                        Span("X", cls="close-btn f6 blue pointer"),
-                        cls="flex justify-end items-center",
-                    ),
-                    Ul(
-                        Li("Zoom: Mouse wheel / touchpad scroll"),
-                        Li("Pan: Click and drag."),
-                        cls="pl3",
-                    ),
-                    cls="info-banner pa3 ba br-rounded b--light-silver br2 shadow-1",
-                ),
-                cls="info-container",
+                cls="info-banner bg-navy pa3 ba br-rounded b--light-silver br2 shadow-1 dn"
             ),
-            Button(
-                "Expand All",
-                id="expand-all",
-                cls="f6 link dim br-rounded ph3 pv2 mb4 mt4 dib white bg-dark-blue",
-            ),
-            Div(id="family-tree"),
-            cls="container",
+            cls="info-container fixed bottom-2 right-2"
         ),
-        Script(src="https://d3js.org/d3.v6.min.js"),
-        Script(src="/public/js/tree.js"),
-        Script("""
-            document.querySelector('.info-icon').addEventListener('click', () => {
-                const banner = document.querySelector('.info-banner');
-                banner.style.display = banner.style.display === 'block' ? 'none' : 'block';
-            });
+        H2("Family Tree Visualization", cls="tc"),
+        Button("Expand All", id="expand-all", cls="f6 link dim br-rounded ph3 pv2 mb4 mt2 dib white bg-dark-blue"),
+        Button("Collapse All", id="collapse-all", cls="dn f6 link dim br-rounded ph3 pv2 mb4 mt2  white bg-dark-blue"),
+        Div(id="family-tree"),
+        cls="container"
+    ),
 
-            document.querySelector('.close-btn').addEventListener('click', () => {
-                document.querySelector('.info-banner').style.display = 'none';
-            });
-        """),
-    )
+    Script(src="https://d3js.org/d3.v6.min.js"),
+    Script(src="/public/js/tree.js")
+)
 
 
 if __name__ == "__main__":
