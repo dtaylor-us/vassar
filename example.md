@@ -1,20 +1,24 @@
-The Northwind database is a sample database used by Microsoft to demonstrate the features of SQL Server. It contains sales data for a fictitious company called Northwind Traders, which imports and exports specialty foods from around the world.
+# Advantages of Neo4j Over SQL: A Business Perspective
 
-In a traditional relational database like SQL Server, the Northwind schema consists of multiple tables such as `Customers`, `Orders`, `Order Details`, `Products`, `Suppliers`, etc. These tables are linked together through foreign keys, and to fetch data that spans multiple tables, you would need to use JOIN operations, which can be complex and computationally expensive for large datasets.
+## 1. Business Question
 
-In contrast, in a graph database like Neo4j, the Northwind schema can be represented as a graph where entities (like Customers, Orders, Products, etc.) are nodes and the relationships between them are edges. This makes it easier to work with the schema because:
+Find all customers who have ordered a specific product.
 
-1. **Relationships are First-Class Citizens**: In Neo4j, relationships are stored at the individual record level, not computed at query time. This makes traversing relationships much faster compared to RDBMS where joins are computationally expensive.
+In SQL, you would need to join the `Customers`, `Orders`, `Order Details`, and `Products` tables. In Neo4j, you can
+simply traverse the graph from the `Product` node to the `Customer` nodes through the `ORDERED` relationship.
 
-2. **Schema Flexibility**: Neo4j is schema-less, which means you can add new types of relationships, nodes, or properties to your graph without disturbing existing application functionality. This is harder to achieve in RDBMS due to its rigid schema.
+### In SQL:
 
-3. **Performance**: Neo4j can execute deep, complex queries faster than RDBMS. This is because it can traverse millions of connections per second per core.
+```SQL
+SELECT c.CustomerID, c.CompanyName
+FROM Customers c
+         JOIN Orders o ON c.CustomerID = o.CustomerID
+         JOIN OrderDetails od ON o.OrderID = od.OrderID
+         JOIN Products p ON od.ProductID = p.ProductID
+WHERE p.ProductID = 1;
+```
 
-4. **Real-time Insights**: Neo4j can provide real-time insights by executing complex queries on connected data in real time.
-
-For example, consider a query to find all customers who have ordered a specific product. In SQL, you would need to join the `Customers`, `Orders`, `Order Details`, and `Products` tables. In Neo4j, you can simply traverse the graph from the `Product` node to the `Customer` nodes through the `ORDERED` relationship.
-
-Here's how you might represent part of the Northwind schema in Neo4j:
+### Schema in Neo4j:
 
 ```cypher
 CREATE (c:Customer {customerID: "ALFKI", companyName: "Alfreds Futterkiste"})
@@ -24,11 +28,76 @@ CREATE (c)-[:PLACED]->(o)
 CREATE (o)-[:CONTAINS]->(p)
 ```
 
-And here's how you might query for all customers who have ordered a specific product:
+### Cypher query for all customers who have ordered a specific product:
 
 ```cypher
 MATCH (c:Customer)-[:PLACED]->(:Order)-[:CONTAINS]->(p:Product {productName: "Chai"})
 RETURN c.companyName
 ```
 
-This query will return the names of all companies that have ordered "Chai". As you can see, the graph model makes it easier to work with the Northwind schema and can provide performance and flexibility benefits over a traditional RDBMS.
+## 2. **Business Question:**
+
+"Find all the products that have been purchased by customers who live in the same city."
+
+### In SQL:
+
+To accomplish this in SQL, you would need to write a query that joins the `Customers`, `Orders`, and `OrderDetails`
+tables, and then possibly join it again with the `Products` table. The query would also need to filter customers who
+live in the same city, making the SQL query somewhat complex:
+
+```sql
+SELECT DISTINCT p.ProductName
+FROM Customers c1
+         JOIN Orders o1 ON c1.CustomerID = o1.CustomerID
+         JOIN OrderDetails od1 ON o1.OrderID = od1.OrderID
+         JOIN Products p ON od1.ProductID = p.ProductID
+WHERE EXISTS (SELECT 1
+              FROM Customers c2
+                       JOIN Orders o2 ON c2.CustomerID = o2.CustomerID
+                       JOIN OrderDetails od2 ON o2.OrderID = od2.OrderID
+              WHERE c2.City = c1.City
+                AND od2.ProductID = p.ProductID);
+```
+
+### In Neo4j (Cypher Query):
+
+```cypher
+MATCH (c1:Customer)-[:PLACED]->(:Order)-[:CONTAINS]->(p:Product)<-[:CONTAINS]-(:Order)<-[:PLACED]-(c2:Customer)
+WHERE c1.city = c2.city
+RETURN DISTINCT p.name;
+```
+
+
+## 3. Business Question
+
+"Find all customers who have ordered more than 5 different products."
+
+### In SQL:
+In SQL, you would need to join the Customers, Orders, Order Details, and Products tables, and then group by CustomerID and filter by the count of distinct ProductID
+```SQL
+SELECT c.CustomerID, c.CompanyName
+FROM Customers c
+         JOIN Orders o ON c.CustomerID = o.CustomerID
+         JOIN OrderDetails od ON o.OrderID = od.OrderID
+GROUP BY c.CustomerID, c.CompanyName
+HAVING COUNT(DISTINCT od.ProductID) > 5;
+```
+
+### In Neo4j (Cypher Query):
+In Neo4j, you can traverse the graph from the Customer nodes to the Product nodes through the ORDERED relationship, and then filter by the count of distinct Product nodes:
+```cypher
+MATCH (c:Customer)-[:PLACED]->(:Order)-[:CONTAINS]->(p:Product)
+WITH c, COUNT(DISTINCT p) AS productCount
+WHERE productCount > 5
+RETURN c.customerID, c.companyName;
+```
+
+
+# Why It's Easier in Neo4j:
+
+- **Direct Relationships:** In Neo4j, you can directly express the relationships between entities (like customers,
+  orders, and products) without needing to worry about complex joins.
+- **Simplified Query:** The query clearly expresses the pattern you're looking for (customers who bought the same
+  product and live in the same city) using a simple MATCH clause.
+- **Natural Representation:** The graph structure naturally represents relationships, making it easier to query patterns
+  like this.

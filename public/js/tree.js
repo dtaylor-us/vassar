@@ -3,189 +3,79 @@ document.addEventListener("DOMContentLoaded", async () => {
     const response = await fetch("/tree");
     const data = await response.json();
 
-    const width = 1200;
+    // Set up dimensions for the SVG
+    const width = 1000;
     const height = 800;
-    const margin = {top: 40, right: 120, bottom: 20, left: 120};
-    const cardWidth = 150;
-    const cardHeight = 50;
-    // Define the background color here
-    const backgroundColor = "#1c1c1c";  // Use the color from the uploaded image
+    const margin = { top: 20, right: 120, bottom: 20, left: 120 };
 
-    const svg = d3
-        .select("#family-tree")
-        .append("svg")
-        .attr("width", width + margin.right + margin.left)
-        .attr("height", height + margin.top + margin.bottom)
-        .style("background-color", backgroundColor)  // Set the background color
-        .style("border", "1px solid white")  // Add a white border
-        .call(d3.zoom().on("zoom", function (event) {
-            svg.attr("transform", event.transform);
-        }))
+    // Create the SVG element
+    const svg = d3.select("body").append("svg")
+        .attr("width", width)
+        .attr("height", height)
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
+    // Set up the tree layout
+    const treeLayout = d3.tree().size([height - margin.top - margin.bottom, width - margin.left - margin.right]);
+
+    // Convert the data into a hierarchy
     const root = d3.hierarchy(data);
-    root.x0 = height / 2;
-    root.y0 = 0;
 
-    // Tree layout with increased separation between columns
-    const treeLayout = d3.tree()
-        .size([height, width - margin.left - margin.right])
-        .separation((a, b) => (a.parent === b.parent ? 2 : 3)); // Increase separation between sibling nodes
+    // Generate the tree structure
+    const treeData = treeLayout(root);
 
-    const update = (source) => {
-        // Assign the new positions for the nodes
-        treeLayout(root);
+    // Create links (lines connecting the nodes)
+    const link = svg.selectAll(".link")
+        .data(treeData.links())
+        .enter().append("path")
+        .attr("class", "link")
+        .attr("d", d3.linkHorizontal()
+            .x(d => d.y)
+            .y(d => d.x))
+        .style("fill", "none")
+        .style("stroke", "#ccc")
+        .style("stroke-width", "2px");
 
-        const nodes = root.descendants();
-        const links = root.descendants().slice(1);
+    // Create nodes
+    const node = svg.selectAll(".node")
+        .data(treeData.descendants())
+        .enter().append("g")
+        .attr("class", d => "node" + (d.children ? " node--internal" : " node--leaf"))
+        .attr("transform", d => `translate(${d.y},${d.x})`);
 
-        // Adjust y position to increase space between columns
-        nodes.forEach(d => {
-            d.y = d.depth * 250;  // Increase horizontal spacing by adjusting depth multiplier
-            d.x *= 1.5;  // Increase vertical spacing by scaling the x position
+    // Add circles for union nodes
+    node.filter(d => d.data.type === "union")
+        .append("circle")
+        .attr("r", 10)
+        .style("fill", "#6baed6")
+        .style("stroke", "#3182bd")
+        .style("stroke-width", "2px");
+
+    // Add rectangles for individual nodes
+    node.filter(d => d.data.type !== "union")
+        .append("rect")
+        .attr("width", 100)
+        .attr("height", 20)
+        .attr("y", -10)
+        .attr("x", -50)
+        .style("fill", d => d.data.gender === "Male" ? "#a1d99b" : "#fdae6b")
+        .style("stroke", "#636363")
+        .style("stroke-width", "1px");
+
+    // Add labels to the nodes
+    node.append("text")
+        .attr("dy", ".35em")
+        .attr("x", d => d.children ? -13 : 13)
+        .style("text-anchor", d => d.children ? "end" : "start")
+        .text(d => d.data.name)
+        .style("font-size", "12px");
+
+    // Add interactivity: zooming and panning
+    const zoom = d3.zoom()
+        .scaleExtent([0.5, 2])
+        .on("zoom", (event) => {
+            svg.attr("transform", event.transform);
         });
 
-        // Update the nodes
-        const node = svg.selectAll("g.node")
-            .data(nodes, d => d.id || (d.id = ++i));
-
-        const nodeEnter = node.enter().append("g")
-            .attr("class", "node")
-            .attr("transform", d => `translate(${source.y0},${source.x0})`)
-            .on("click", click);
-
-        nodeEnter.append("rect")
-            .attr("width", cardWidth)
-            .attr("height", cardHeight)
-            .attr("x", -cardWidth / 2)
-            .attr("y", -cardHeight / 2)
-            .attr("fill", d => d._children ? "#9b3df4" : "#e1bcff")
-            .attr("stroke", "#e1bcff")
-            .attr("stroke-width", "2px")
-            .attr("rx", 10)
-            .attr("ry", 10);
-
-        nodeEnter.append("text")
-            .attr("dy", ".35em")
-            .attr("x", 0)
-            .attr("text-anchor", "middle")
-            .attr("fill", "#000")
-            .text(d => d.data.name);
-
-        const nodeUpdate = nodeEnter.merge(node);
-
-        nodeUpdate.transition()
-            .duration(750)
-            .attr("transform", d => `translate(${d.y},${d.x})`);
-
-        nodeUpdate.select("rect")
-            .attr("fill", d => d._children ? "#9b3df4" : "#e1bcff");
-
-        nodeUpdate.select("text")
-            .style("fill-opacity", 1);
-
-        const nodeExit = node.exit().transition()
-            .duration(750)
-            .attr("transform", d => `translate(${source.y},${source.x})`)
-            .remove();
-
-        nodeExit.select("rect")
-            .attr("width", 1e-6)
-            .attr("height", 1e-6);
-
-        nodeExit.select("text")
-            .style("fill-opacity", 1e-6);
-
-        // Update the links
-        const link = svg.selectAll("path.link")
-            .data(links, d => d.id);
-
-        const linkEnter = link.enter().insert("path", "g")
-            .attr("class", "link")
-            .attr("d", d => {
-                const o = {x: source.x0, y: source.y0};
-                return diagonal({source: o, target: o});
-            })
-            .attr("fill", "none")
-            .attr("stroke", "#ccc")
-            .attr("stroke-width", "2px");
-
-        const linkUpdate = linkEnter.merge(link);
-
-        linkUpdate.transition()
-            .duration(750)
-            .attr("d", d => diagonal({source: d.parent, target: d}));
-
-        const linkExit = link.exit().transition()
-            .duration(750)
-            .attr("d", d => {
-                const o = {x: source.x, y: source.y};
-                return diagonal({source: o, target: o});
-            })
-            .remove();
-
-        nodes.forEach(d => {
-            d.x0 = d.x;
-            d.y0 = d.y;
-        });
-    };
-
-    const click = (event, d) => {
-        if (d.children) {
-            d._children = d.children;
-            d.children = null;
-        } else {
-            d.children = d._children;
-            d._children = null;
-        }
-        update(d);
-    };
-
-    const collapse = (d) => {
-        if (d.children) {
-            d._children = d.children;
-            d._children.forEach(collapse);
-            d.children = null;
-        }
-    };
-
-    const expandAll = () => {
-        root.each(d => {
-            if (d._children) {
-                d.children = d._children;
-                d._children = null;
-            }
-        });
-        update(root);
-        document.querySelector("#expand-all").style.display = "none";
-        document.querySelector("#collapse-all").style.display = "block";
-    };
-
-    const collapseAll = () => {
-        root.each(collapse);
-        update(root);
-        document.querySelector("#expand-all").style.display = "block";
-        document.querySelector("#collapse-all").style.display = "none";
-    }
-
-    d3.select("#expand-all").on("click", expandAll);
-    d3.select("#collapse-all").on("click", collapseAll);
-
-    const diagonal = d3.linkHorizontal()
-        .x(d => d.y)
-        .y(d => d.x);
-
-    let i = 0;
-    root.children.forEach(collapse); // Start with all nodes collapsed
-    update(root);
-});
-
-document.querySelector('.info-icon').addEventListener('mouseenter', () => {
-    const banner = document.querySelector('.info-banner');
-    banner.style.display = banner.style.display === 'block' ? 'none' : 'block';
-});
-
-document.querySelector('.close-btn').addEventListener('click', () => {
-    document.querySelector('.info-banner').style.display = 'none';
+    d3.select("svg").call(zoom);
 });

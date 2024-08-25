@@ -1,5 +1,3 @@
-from typing import List
-
 from fasthtml.components import (
     Nav,
     A,
@@ -18,23 +16,23 @@ from fasthtml.components import (
     H2,
 )
 from fasthtml.fastapp import fast_app, serve
-from neo4j import Record, EagerResult
-from starlette.responses import FileResponse, JSONResponse
 from rich.console import Console
+from starlette.responses import FileResponse, JSONResponse
 
 from vassar.database import async_query, get_async_driver
-
 
 console = Console()
 
 app, rt = fast_app(live=True, debug=True)
 
 GRAPH_DATA_QUERY = """
-MATCH (p:Person)-[:PARENT_OF]->(descendant:Person)
-RETURN p, descendant;
+MATCH(p:Person) Return p
 """
 
-DATABASE = "neo4j"
+UNION_DATA_QUERY = """
+MATCH (parent1:Person)-[:CHILD_OF]->(child:Person)<-[:CHILD_OF]-(parent2:Person)
+RETURN parent1.person_id AS parent1_id, parent2.person_id AS parent2_id, child.person_id AS child_id
+"""
 
 
 @rt("/{fname:path}.{ext:static}")
@@ -42,41 +40,101 @@ async def get(fname: str, ext: str):
     return FileResponse(f"public/{fname}.{ext}")
 
 
-def format_graph_data(data: EagerResult):
-    nodes = {}
-    for record in data.records:
-        parent = record["p"]
-        descendant = record["descendant"]
+def find_person_by_name(people, name):
+    for person in people.values():
+        if person['name'] == name:
+            return person
+    return None
 
-        # Ensure parent node exists
-        if parent["name"] not in nodes:
-            nodes[parent["name"]] = {"name": parent["name"], "children": []}
 
-        # Ensure descendant node exists
-        if descendant["name"] not in nodes:
-            nodes[descendant["name"]] = {"name": descendant["name"], "children": []}
+def build_subtree(person_id, people, unions):
+    person = people[person_id]
 
-        # Append the descendant to the parent's children
-        nodes[parent["name"]]["children"].append(nodes[descendant["name"]])
+    # Find children for this person
+    children = []
+    for union in unions.values():
+        if union['parent1_id'] == person_id or union['parent2_id'] == person_id:
+            child_person_id = union['child_id']
+            child_tree = build_subtree(child_person_id, people, unions)
+            children.append(child_tree)
 
-    # Find the root nodes (nodes without parents)
-    root_candidates = set(nodes.keys()) - {
-        record["descendant"]["name"] for record in data.records
-    }
-    roots = [nodes[name] for name in root_candidates]
+    if not children:
+        # If no children, return the person node
+        return {"name": person['name'], "gender": person['gender'], "type": "person"}
 
-    # If there's only one root, return it; otherwise, create a single root node for all
-    if len(roots) == 1:
-        return roots[0]
+    # Find the other parent in the union
+    parent_union = None
+    for union in unions.values():
+        if union['child_id'] == person_id:
+            parent_union = union
+            break
+
+    if parent_union:
+        parent1 = people[parent_union['parent1_id']]
+        parent2 = people[parent_union['parent2_id']]
+        return {
+            "type": "union",
+            "parents": [
+                {"name": parent1['name'], "gender": parent1['gender'], "type": "person"},
+                {"name": parent2['name'], "gender": parent2['gender'], "type": "person"}
+            ],
+            "children": children
+        }
     else:
-        return {"name": "Tree", "children": roots}
+        return {"name": person['name'], "gender": person['gender'], "type": "person"}
+
+
+def build_family_tree(data, relationships):
+    people = {}
+    unions = {}
+
+    root_person_name = "John Doe"
+
+    # Populate the people dictionary from the EagerResult records
+    for record in data.records:
+        person_data = record['p']  # Assuming 'p' is the alias for the person node in your Cypher query
+        person_id = person_data['person_id']
+        person = {
+            "id": person_id,
+            "name": person_data["name"],
+            "gender": person_data["gender"],
+            "birthdate": person_data["birthdate"].iso_format()  # Adjust as needed for date formatting
+        }
+        people[person_id] = person
+
+    # Populate the unions dictionary from the relationships
+    for record in relationships.records:
+        parent1_id = record["parent1_id"]
+        parent2_id = record["parent2_id"]
+        child_id = record["child_id"]
+        unions[child_id] = {
+            "parent1_id": parent1_id,
+            "parent2_id": parent2_id,
+            "child_id": child_id
+        }
+
+    # Find the target person (root person)
+    target_person = find_person_by_name(people, root_person_name)
+    if not target_person:
+        return {"error": "Root person not found"}
+
+    # The root of the family tree
+    family_tree = {
+        "name": "Root Node",
+        "type": "root",
+        "children": [build_subtree(target_person['id'], people, unions)]
+    }
+
+    return family_tree
 
 
 @rt("/tree")
 async def get(request):
     async with get_async_driver() as driver:
-        data = await async_query(driver, GRAPH_DATA_QUERY)
-        root = format_graph_data(data)
+        people = await async_query(driver, GRAPH_DATA_QUERY)
+        relationships = await async_query(driver, UNION_DATA_QUERY)
+        root = build_family_tree(people, relationships)
+        console.print(root)
         return JSONResponse(root)
 
 
