@@ -1,5 +1,3 @@
-from typing import List
-
 from fasthtml.components import (
     Nav,
     A,
@@ -18,12 +16,11 @@ from fasthtml.components import (
     H2,
 )
 from fasthtml.fastapp import fast_app, serve
-from neo4j import Record, EagerResult
-from starlette.responses import FileResponse, JSONResponse
+from neo4j import EagerResult
 from rich.console import Console
+from starlette.responses import FileResponse, JSONResponse
 
 from vassar.database import async_query, get_async_driver
-
 
 console = Console()
 
