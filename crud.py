@@ -14,15 +14,15 @@ err_console = Console(stderr=True)
 app = typer.Typer()
 
 
-# @app.command()
-# def database_schema():
-#     schema_json = db.database_schema()
-#     console.print_json(schema_json)
-#     return schema_json
+@app.command()
+def database_schema():
+    schema_json = db.database_schema()
+    console.print_json(schema_json)
+    return schema_json
 
 
 @app.command()
-def adhoc_query(natural_language_query: str = "Who are the children of Mary Doe?"):
+def adhoc_query(natural_language_query: str):
     schema_json = db.database_schema()
     query_str = f"""
     Given the following Neo4j database schema
